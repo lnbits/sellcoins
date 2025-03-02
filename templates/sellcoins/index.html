@@ -1,0 +1,151 @@
+{% extends "base.html" %} {% from "macros.jinja" import window_vars with context
+%} {% block scripts %} {{ window_vars(user) }}
+<script src="{{ static_url_for('sellcoins/static', path='js/index.js') }}"></script>
+{% endblock %} {% block page %}
+<div class="row q-col-gutter-md">
+  <div class="col-12 col-md-8 col-lg-7 q-gutter-y-md">
+    <q-card>
+      <q-card-section>
+        <div class="row">
+          <div class="col-md-4 col-sm-12">
+            <q-select
+              class="q-pr-md"
+              filled
+              dense
+              v-model="settings.wallet_id"
+              :options="g.user.walletOptions"
+              label="Wallet *"
+            ></q-select>
+          </div>
+          <div class="col-md-4 col-sm-12">
+            <q-select
+              class="q-pr-md"
+              filled
+              dense
+              emit-value
+              v-model="settings.fiat"
+              :options="currencyOptions"
+              label="Currency you'll denominate your products in"
+            ></q-select>
+          </div>
+          <div class="col-md-4 col-sm-12">
+            <q-input
+              class="q-pr-md"
+              filled
+              dense
+              v-model.trim="settings.stripe_key"
+              label="Add your stripe key"
+              placeholder="pk_test_51I4Z5..."
+            ></q-input>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+    <q-btn
+      unelevated
+      color="primary"
+      icon="add"
+      round
+      size="md"
+      @click="show_product_form = true"
+    ></q-btn>
+    <q-card v-for="product in products">
+      <span v-text="product.price"></span>
+    </q-card>
+  </div>
+  <div class="col-12 col-md-4 col-lg-5 q-gutter-y-md">
+    <q-card>
+      <q-card-section>
+        <h6 class="text-subtitle1 q-my-none">
+          {{SITE_TITLE}} SellCoins ({{LNBITS_DENOMINATION}})
+        </h6>
+        <p>
+          Sell {{LNBITS_DENOMINATION}} for <span v-text="settings.fiat"></span>
+        </p>
+      </q-card-section>
+      <q-card-section class="q-pa-none">
+        <q-separator></q-separator>
+        <q-list>
+          {% include "sellcoins/_api_docs.html" %}
+          <q-separator></q-separator>
+          {% include "sellcoins/_sellcoins.html" %}
+        </q-list>
+      </q-card-section>
+    </q-card>
+  </div>
+
+  <!--/////////////////////////////////////////////////-->
+  <!--//////////////FORM DIALOG////////////////////////-->
+  <!--/////////////////////////////////////////////////-->
+
+  <q-dialog
+    v-model="show_product_form"
+    position="top"
+    @hide="closeFormDialog"
+  >
+    <q-card class="q-pa-lg q-pt-xl" style="width: 500px">
+      <q-form @submit="createProduct" class="q-gutter-md">
+        <q-input
+          filled
+          dense
+          v-model.trim="product.title"
+          label="Title"
+        ></q-input>
+        <q-input
+          filled
+          dense
+          v-model.trim="product.description"
+          label="Description"
+        ></q-input>
+        <q-input
+          filled
+          dense
+          v-model.trim="product.price"
+          label="Price"
+        ></q-input>
+        <div class="row">
+          <div class="col">
+            <q-toggle
+            v-if="product.amount == null"
+            size="md"
+            v-model="product.auto_convert"
+            checked-icon="check"
+            color="green"
+            unchecked-icon="clear"
+            :label="product.auto_convert ? 'Auto-convert (on)' : 'Auto-convert (off)'"
+          ></q-toggle>
+          </div>
+          <div class="col">
+            
+
+      <q-input
+      v-if="product.auto_convert == true"
+      filled
+      dense
+      v-model.trim="product.cut_percentage"
+      label="Percentage to take as a cut if auto-converting"
+    ></q-input>
+          </div>
+        </div>
+        <q-input
+        v-if="product.auto_convert == false"
+        filled
+        dense
+        v-model.trim="product.amount"
+        label="Amount you want to sell"
+      ></q-input>
+
+        <div class="row q-mt-lg">
+          <q-btn v-if="product.id" unelevated color="primary" type="submit"
+            >Update Product</q-btn
+          >
+          <q-btn unelevated color="primary" type="submit">Create Product</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+            >Cancel</q-btn
+          >
+        </div>
+      </q-form>
+    </q-card>
+  </q-dialog>
+</div>
+{% endblock %}
