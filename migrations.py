@@ -29,7 +29,7 @@ async def m002_initial(db):
             price INTEGER NOT NULL,
             auto_convert BOOLEAN,
             amount INTEGER,
-            cut_percentage INTEGER,
+            cut_percentage INTEGER
         );
     """
     )
