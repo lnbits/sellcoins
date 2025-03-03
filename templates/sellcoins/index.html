@@ -14,7 +14,7 @@
     <q-card>
       <q-card-section>
         <div class="row">
-          <div class="col-md-5 col-sm-12">
+          <div class="col-md-4 col-sm-12">
             <q-select
               class="q-pr-md q-pt-sm"
               filled
@@ -41,7 +41,7 @@
               filled
               dense
               v-model.trim="settings.stripe_key"
-              label="Add your stripe key"
+              label="Paste your stripe key"
               placeholder="pk_test_51I4Z5..."
             ></q-input>
           </div>
@@ -54,7 +54,12 @@
           unchecked-icon="clear"
           :disable="!settings.stripe_key && !settings.fiat && !settings.wallet_id"
         ><q-tooltip>Launch page</q-tooltip></q-toggle>
-      </div>  
+          </div>
+          <div class="col-md-1 col-sm-12">
+            <q-btn round color="secondary" icon="update" @click="updateSettings">
+              <q-tooltip>Update</q-tooltip>
+            </q-btn>
+            </div>
       </div>
       </q-card-section>
     </q-card>

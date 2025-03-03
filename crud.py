@@ -17,14 +17,12 @@ async def create_settings(data: Settings) -> Settings:
     await db.insert("sellcoins.settings", data)
     return Settings(**data.dict())
 
-
-async def get_settings(sellcoins_id: str) -> Optional[Settings]:
+async def get_settings(user_id: str) -> Optional[Settings]:
     return await db.fetchone(
-        "SELECT * FROM sellcoins.settings WHERE id = :id",
-        {"id": sellcoins_id},
+        "SELECT * FROM sellcoins.settings WHERE user_id = :user_id",
+        {"user_id": user_id},
         Settings,
     )
-
 
 async def update_settings(data: Settings) -> Settings:
     await db.update("sellcoins.settings", data)

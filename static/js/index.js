@@ -47,16 +47,30 @@ window.app = Vue.createApp({
       }
     },
     async updateSettings() {
-      try {
-        await LNbits.api.request(
-          'PUT',
-          '/sellcoins/api/v1/settings',
-          this.g.user.wallets[0].adminkey,
-          this.settings.data
-        )
-        LNbits.utils.notifySuccess('Settings updated successfully')
-      } catch (err) {
-        LNbits.utils.notifyApiError(err)
+      if(
+        this.settings.stripe_key && 
+        this.settings.fiat &&
+        this.settings.wallet_id &&
+        this.settings.title &&
+        this.settings.description
+      ) {
+        try {
+          await LNbits.api.request(
+            'PUT',
+            '/sellcoins/api/v1/settings',
+            this.g.user.wallets[0].adminkey,
+            this.settings.data
+          )
+          LNbits.utils.notifySuccess('Settings updated successfully')
+        } catch (err) {
+          LNbits.utils.notifyApiError(err)
+        }
+      }
+      else{
+        this.$q.notify({
+          type: 'warning',
+          message: 'Please complete all fields.'
+        })
       }
     },
     async createProduct(productData) {
