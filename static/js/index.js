@@ -17,6 +17,7 @@ window.app = Vue.createApp({
         auto_convert: true
       },
       settings: {
+        launch_page: false,
         stripe_key: '',
         fiat: 'USD',
         wallet_id: '',

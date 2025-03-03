@@ -11,6 +11,7 @@ class Settings(BaseModel):
     title: Optional[str] = ""
     description: Optional[str] = ""
     stripe_key: Optional[str] = ""
+    launch_page: Optional[bool]
 
 class Product(BaseModel):
     id: Optional[str] = ""

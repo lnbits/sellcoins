@@ -10,7 +10,8 @@ async def m001_initial(db):
             wallet_id TEXT NOT NULL,
             title TEXT NOT NULL,
             description TEXT NOT NULL,
-            stripe_key TEXT NOT NULL
+            stripe_key TEXT NOT NULL,
+            launch_page BOOLEAN NOT NULL
         );
     """
     )
