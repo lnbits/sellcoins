@@ -17,6 +17,7 @@ window.app = Vue.createApp({
         auto_convert: true
       },
       settings: {
+        user_id: "this.g.user.id",
         launch_page: false,
         stripe_key: '',
         fiat: 'USD',
@@ -37,7 +38,7 @@ window.app = Vue.createApp({
         const response = await LNbits.api.request(
           'GET',
           '/sellcoins/api/v1/settings',
-          this.g.user.wallets[0].inkey
+          this.g.user.wallets[0].admminkey
         )
         if (!response.data.wallet_id) {
           this.settings.data = response.data
@@ -47,6 +48,17 @@ window.app = Vue.createApp({
       }
     },
     async updateSettings() {
+      const settings = {
+        wallet_id: this.settings.wallet_id,
+        launch_page: this.settings.launch_page,
+        stripe_key: this.settings.stripe_key,
+        fiat: this.settings.fiat,
+        title: this.settings.title,
+        description: this.settings.description,
+        user_id: this.settings.user_id
+      }
+      this.settings.user_id = this.g.user.id
+      this.settings.wallet_id = this.settings.wallet_id.value
       if(
         this.settings.stripe_key && 
         this.settings.fiat &&
@@ -55,13 +67,22 @@ window.app = Vue.createApp({
         this.settings.description
       ) {
         try {
-          await LNbits.api.request(
+          console.log(settings)
+          await LNbits.api
+          .request(
             'PUT',
             '/sellcoins/api/v1/settings',
             this.g.user.wallets[0].adminkey,
-            this.settings.data
+            settings,
           )
-          LNbits.utils.notifySuccess('Settings updated successfully')
+          .then(response => {
+            LNbits.utils.notifySuccess('Settings updated successfully')
+            if (response.data) {
+              console.log(response.data)
+              this.settings.data = response.data
+            }
+          }
+          )
         } catch (err) {
           LNbits.utils.notifyApiError(err)
         }

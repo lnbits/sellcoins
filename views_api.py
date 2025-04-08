@@ -21,6 +21,7 @@ from .crud import (
 from lnbits.core.crud import get_wallet
 from .models import Orders, Product, Settings
 from .helpers import verify_stripe_key
+from loguru import logger
 sellcoins_api_router = APIRouter()
 
 ## SETTINGS

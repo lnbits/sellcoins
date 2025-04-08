@@ -14,6 +14,26 @@
     <q-card>
       <q-card-section>
         <div class="row">
+          <div class="col-md-3 col-sm-12">
+            <q-input
+            class="q-pr-md q-pt-sm"
+            filled
+            dense
+            v-model.trim="settings.title"
+            label="Title for the sale page"
+          ></q-input>
+          </div>
+          <div class="col-md-9 col-sm-12">
+            <q-input
+            class="q-pr-md q-pt-sm"
+            filled
+            dense
+            v-model.trim="settings.description"
+            label="Description for the sale page"
+          ></q-input>
+          </div>
+        </div>
+        <div class="row">
           <div class="col-md-4 col-sm-12">
             <q-select
               class="q-pr-md q-pt-sm"
