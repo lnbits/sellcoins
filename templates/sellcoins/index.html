@@ -6,7 +6,7 @@
   <div class="col-12 col-md-8 col-lg-7 q-gutter-y-md">
     <q-card-section>
       <h3 class="q-my-none">
-        SellCoins
+        SellCoins -
         <small>
           sell {{LNBITS_DENOMINATION}} for <span v-text="settings.fiat"></span>
         </small>
@@ -23,7 +23,7 @@
             label="Title for the sale page"
           ></q-input>
           </div>
-          <div class="col-md-9 col-sm-12">
+          <div class="col-md-5 col-sm-12">
             <q-input
             class="q-pr-md q-pt-sm"
             filled
@@ -32,17 +32,36 @@
             label="Description for the sale page"
           ></q-input>
           </div>
+          <div class="col-md-4 col-sm-12">
+            <q-input
+            class="q-pr-md q-pt-sm"
+            filled
+            dense
+            v-model.trim="settings.header_mage"
+            label="Header image url (1200x250px)"
+          ></q-input>
+          </div>
         </div>
         <div class="row">
-          <div class="col-md-4 col-sm-12">
+          <div class="col-md-3 col-sm-12">
             <q-select
               class="q-pr-md q-pt-sm"
               filled
               dense
-              v-model="settings.wallet_id"
+              v-model="settings.send_wallet_id"
               :options="g.user.walletOptions"
-              label="Wallet *"
-            ></q-select>
+              label="Send wallet *"
+            ><q-tooltip>Wallet you will send to</q-tooltip></q-select>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <q-select
+              class="q-pr-md q-pt-sm"
+              filled
+              dense
+              v-model="settings.receive_wallet_id"
+              :options="g.user.walletOptions"
+              label="Receive wallet *"
+            ><q-tooltip>Wallet you will send from</q-tooltip></q-select>
           </div>
           <div class="col-md-2 col-sm-12">
             <q-select
@@ -55,34 +74,33 @@
               label="Currency you'll denominate your products in"
             ></q-select>
           </div>
-          <div class="col-md-4 col-sm-12">
+          <div class="col-md-2 col-sm-12">
             <q-input
               class="q-pr-md q-pt-sm"
               filled
               dense
-              v-model.trim="settings.stripe_key"
-              label="Paste your stripe key"
-              placeholder="pk_test_51I4Z5..."
+              type="number"
+              v-model.trim="settings.haircut"
+              label="Haircut"
+              placeholder="2"
             ></q-input>
           </div>
-          <div class="col-md-1 col-sm-12">
-          <q-toggle
+          <div class="col-md-2 col-sm-12 q-pt-sm">
+            <q-btn rounded color="secondary" label="update" @click="updateSettings">
+              <q-tooltip>Update</q-tooltip>
+            </q-btn>
+          </div>
+      </div>
+      </q-card-section>
+    </q-card>
+    Launch Public Page <q-toggle
           size="md"
           v-model="settings.launch_page"
           checked-icon="check"
           color="green"
           unchecked-icon="clear"
-          :disable="!settings.stripe_key && !settings.fiat && !settings.wallet_id"
-        ><q-tooltip>Launch page</q-tooltip></q-toggle>
-          </div>
-          <div class="col-md-1 col-sm-12">
-            <q-btn round color="secondary" icon="update" @click="updateSettings">
-              <q-tooltip>Update</q-tooltip>
-            </q-btn>
-            </div>
-      </div>
-      </q-card-section>
-    </q-card>
+          :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"
+        ><q-tooltip>Launch page</q-tooltip></q-toggle><br />
     <q-btn
       unelevated
       color="primary"

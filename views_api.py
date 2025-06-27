@@ -19,7 +19,7 @@ from .crud import (
     create_settings,
 )
 from lnbits.core.crud import get_wallet
-from .models import Orders, Product, Settings
+from .models import Order, Product, Settings
 from .helpers import verify_stripe_key
 from loguru import logger
 sellcoins_api_router = APIRouter()
@@ -81,26 +81,26 @@ async def api_delete_product(
     return {"message": "Product deleted successfully"}
 
 
-## ORDERS
+## Order
 
 
 @sellcoins_api_router.post("/api/v1/order", status_code=HTTPStatus.CREATED)
-async def api_create_order(data: Orders) -> Orders:
+async def api_create_order(data: Order) -> Order:
     return await create_order(data)
 
 
 @sellcoins_api_router.get("/api/v1/order/{order_id}")
-async def api_get_order(order_id: str) -> Orders:
+async def api_get_order(order_id: str) -> Order:
     order = await get_order(order_id)
     if not order:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Order not found.")
     return order
 
 
-@sellcoins_api_router.get("/api/v1/orders")
+@sellcoins_api_router.get("/api/v1/Order")
 async def api_get_orders(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
-) -> list[Orders]:
+) -> list[Order]:
     return await get_orders(wallet.wallet.id)
 
 

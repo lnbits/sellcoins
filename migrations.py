@@ -5,13 +5,22 @@ async def m001_initial(db):
     await db.execute(
         """
         CREATE TABLE sellcoins.settings (
-            user_id TEXT PRIMARY KEY NOT NULL,
-            fiat TEXT NOT NULL,
-            wallet_id TEXT NOT NULL,
+            id TEXT PRIMARY KEY NOT NULL,
+            denomination TEXT NOT NULL,
+            send_wallet_id TEXT NOT NULL,
+            receive_wallet_id TEXT NOT NULL,
             title TEXT NOT NULL,
             description TEXT NOT NULL,
+            header_mage TEXT NOT NULL,
             stripe_key TEXT NOT NULL,
-            launch_page BOOLEAN NOT NULL
+            email BOOLEAN,
+            email_port INTEGER,
+            email_username TEXT,
+            email_password TEXT,
+            email_from TEXT,
+            email_to TEXT,
+            email_subject TEXT,
+            email_message TEXT
         );
     """
     )
@@ -25,12 +34,13 @@ async def m002_initial(db):
         """
         CREATE TABLE sellcoins.products (
             id TEXT PRIMARY KEY NOT NULL,
+            settings_id TEXT NOT NULL,
             title TEXT NOT NULL,
             description TEXT NOT NULL,
-            price INTEGER NOT NULL,
-            auto_convert BOOLEAN,
             amount INTEGER,
-            cut_percentage INTEGER
+            price INTEGER,
+            auto_convert BOOLEAN,
+            haircut INTEGER
         );
     """
     )
@@ -46,7 +56,6 @@ async def m003_initial(db):
             id TEXT PRIMARY KEY NOT NULL,
             product_id TEXT NOT NULL,
             status TEXT NOT NULL,
-            stripe_purchase_id TEXT NOT NULL,
             created TEXT NOT NULL
         );
     """

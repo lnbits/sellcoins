@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 from lnbits.db import Database
 from lnbits.helpers import urlsafe_short_hash
 
-from .models import Orders, Product, Settings
+from .models import Order, Product, Settings
 
 db = Database("ext_sellcoins")
 
@@ -29,35 +29,35 @@ async def update_settings(data: Settings) -> Settings:
     return Settings(**data.dict())
 
 
-# ORDERS
+# Order
 
 
-async def create_order(data: Orders) -> Orders:
+async def create_order(data: Order) -> Order:
     data.id = urlsafe_short_hash()
-    await db.insert("sellcoins.orders", data)
-    return Orders(**data.dict())
+    await db.insert("sellcoins.Order", data)
+    return Order(**data.dict())
 
 
-async def get_order(sellcoins_id: str) -> Optional[Orders]:
+async def get_order(sellcoins_id: str) -> Optional[Order]:
     return await db.fetchone(
-        "SELECT * FROM sellcoins.orders WHERE id = :id",
+        "SELECT * FROM sellcoins.Order WHERE id = :id",
         {"id": sellcoins_id},
-        Orders,
+        Order,
     )
 
 
-async def update_order(data: Orders) -> Orders:
-    await db.update("sellcoins.orders", data)
-    return Orders(**data.dict())
+async def update_order(data: Order) -> Order:
+    await db.update("sellcoins.Order", data)
+    return Order(**data.dict())
 
 
-async def get_orders(wallet_ids: Union[str, List[str]]) -> List[Orders]:
+async def get_orders(wallet_ids: Union[str, List[str]]) -> List[Order]:
     if isinstance(wallet_ids, str):
         wallet_ids = [wallet_ids]
     q = ",".join([f"'{w}'" for w in wallet_ids])
     return await db.fetchall(
-        f"SELECT * FROM sellcoins.orders WHERE wallet IN ({q}) ORDER BY id",
-        model=Orders,
+        f"SELECT * FROM sellcoins.Order WHERE wallet IN ({q}) ORDER BY id",
+        model=Order,
     )
 
 

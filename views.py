@@ -43,7 +43,7 @@ async def get_order_page(req: Request, order_id: str):
     )
 
 
-@sellcoins_generic_router.get("/products")
+@sellcoins_generic_router.get("/products/{settings_id}")
 async def get_products_page(req: Request, user: User = Depends(check_user_exists)):
     products = await get_products(user.wallet_ids)
     return sellcoins_renderer().TemplateResponse(
