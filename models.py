@@ -9,6 +9,8 @@ class Settings(BaseModel):
     title: Optional[str] = ""
     description: Optional[str] = ""
     header_mage: Optional[str] = ""
+    haircut: Optional[int] = ""
+    auto_convert: Optional[bool]
     email: Optional[bool]
     email_port: Optional[int]
     email_username: Optional[str] = ""
@@ -25,8 +27,6 @@ class Product(BaseModel):
     description: Optional[str] = ""
     amount: Optional[int]
     price: Optional[int]
-    auto_convert: Optional[bool]
-    cut_percentage: Optional[int]
 
 class Order(BaseModel):
     id: Optional[str] = ""

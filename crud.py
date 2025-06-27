@@ -38,10 +38,10 @@ async def create_order(data: Order) -> Order:
     return Order(**data.dict())
 
 
-async def get_order(sellcoins_id: str) -> Optional[Order]:
+async def get_order(checking_id: str) -> Optional[Order]:
     return await db.fetchone(
         "SELECT * FROM sellcoins.Order WHERE id = :id",
-        {"id": sellcoins_id},
+        {"id": checking_id},
         Order,
     )
 
@@ -61,7 +61,7 @@ async def get_orders(wallet_ids: Union[str, List[str]]) -> List[Order]:
     )
 
 
-# PACKAGES
+# PRODUCTS
 
 
 async def create_product(data: Product) -> Product:
@@ -70,15 +70,23 @@ async def create_product(data: Product) -> Product:
     return Product(**data.dict())
 
 
-async def get_products(sellcoins_id: str) -> Optional[Product]:
+async def get_product(product_id: str) -> Optional[Product]:
     return await db.fetchone(
         "SELECT * FROM sellcoins.products WHERE id = :id",
-        {"id": sellcoins_id},
+        {"id": product_id},
+        Product,
+    )
+
+async def get_products(setting_id: Union[str, List[str]]) -> List[Product]:
+    return await db.fetchall(
+        "SELECT * FROM sellcoins.products WHERE id = :id",
+        {"id": setting_id},
         Product,
     )
 
 
-async def delete_product(sellcoins_id: str) -> None:
+
+async def delete_product(product_id: str) -> None:
     await db.execute(
-        "DELETE FROM sellcoins.products WHERE id = :id", {"id": sellcoins_id}
+        "DELETE FROM sellcoins.products WHERE id = :id", {"id": product_id}
     )

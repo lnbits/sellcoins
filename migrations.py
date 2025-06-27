@@ -12,7 +12,8 @@ async def m001_initial(db):
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             header_mage TEXT NOT NULL,
-            stripe_key TEXT NOT NULL,
+            haircut INTEGER,
+            auto_convert BOOLEAN
             email BOOLEAN,
             email_port INTEGER,
             email_username TEXT,
@@ -38,9 +39,7 @@ async def m002_initial(db):
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             amount INTEGER,
-            price INTEGER,
-            auto_convert BOOLEAN,
-            haircut INTEGER
+            price INTEGER
         );
     """
     )

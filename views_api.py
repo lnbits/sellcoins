@@ -13,6 +13,7 @@ from .crud import (
     delete_product,
     get_order,
     get_orders,
+    get_product,
     get_products,
     get_settings,
     update_settings,
@@ -25,7 +26,6 @@ from loguru import logger
 sellcoins_api_router = APIRouter()
 
 ## SETTINGS
-
 
 @sellcoins_api_router.get("/api/v1/settings")
 async def api_get_settings(
@@ -55,8 +55,7 @@ async def api_update_settings(
     return await update_settings(data)
 
 
-## PACKAGES
-
+## PRODUCTS
 
 @sellcoins_api_router.post("/api/v1/product", status_code=HTTPStatus.CREATED)
 async def api_create_product(
@@ -86,7 +85,25 @@ async def api_delete_product(
 
 @sellcoins_api_router.post("/api/v1/order", status_code=HTTPStatus.CREATED)
 async def api_create_order(data: Order) -> Order:
-    return await create_order(data)
+    product = await get_product(data.product_id)
+    settings = await get_settings(product.settings_id)
+    if settings.auto_convert:
+        rate = await = btc_rates(settings.denomination)
+        sats = (100 / rate) * 100_000_000
+        amount = sats * (1 + settings.haircut_amount / 100)
+    else:
+        amount = product.price
+    payment = await create_invoice(
+            wallet_id=settings.wallet_id,
+            amount=amount,
+            memo=f"Sellcoins ransaction for {product.title}",
+            extra={
+                "tag": "sellcoins"
+            },
+        )
+    data.id = payment.checking_id
+    await create_order(data)
+    return payment
 
 
 @sellcoins_api_router.get("/api/v1/order/{order_id}")
@@ -102,21 +119,3 @@ async def api_get_orders(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
 ) -> list[Order]:
     return await get_orders(wallet.wallet.id)
-
-
-## STRIPE WEBHOOK
-
-
-@sellcoins_api_router.post("/api/v1/stripe/webhook")
-async def api_stripe_webhook(request: Request):
-    payload = await request.json()
-    event_type = payload.get("type")
-
-    if event_type == "payment_intent.succeeded":
-        stripe_purchase_id = payload["data"]["object"]["id"]
-        order = await get_order_by_stripe_id(stripe_purchase_id)
-        if order:
-            order.status = "paid"
-            await update_order(order)
-
-    return {"message": "Webhook received"}
