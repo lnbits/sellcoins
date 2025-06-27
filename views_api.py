@@ -16,9 +16,12 @@ from .crud import (
     get_products,
     get_settings,
     update_settings,
+    create_settings,
 )
+from lnbits.core.crud import get_wallet
 from .models import Orders, Product, Settings
-
+from .helpers import verify_stripe_key
+from loguru import logger
 sellcoins_api_router = APIRouter()
 
 ## SETTINGS
@@ -40,11 +43,14 @@ async def api_get_settings(
 async def api_update_settings(
     data: Settings, wallet: WalletTypeInfo = Depends(require_admin_key)
 ) -> Settings:
-    settings = await get_settings(wallet.wallet.id)
-    if not settings:
+    check_key = await verify_stripe_key(data.stripe_key)
+    if not check_key:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Settings not found."
+            status_code=HTTPStatus.BAD_REQUEST, detail="Checking API key failed"
         )
+    settings = await get_settings(wallet.user)
+    if not settings:
+        return await create_settings(data)
     data.wallet_id = wallet.wallet.id
     return await update_settings(data)
 

@@ -17,6 +17,8 @@ window.app = Vue.createApp({
         auto_convert: true
       },
       settings: {
+        user_id: "this.g.user.id",
+        launch_page: false,
         stripe_key: '',
         fiat: 'USD',
         wallet_id: '',
@@ -36,7 +38,7 @@ window.app = Vue.createApp({
         const response = await LNbits.api.request(
           'GET',
           '/sellcoins/api/v1/settings',
-          this.g.user.wallets[0].inkey
+          this.g.user.wallets[0].admminkey
         )
         if (!response.data.wallet_id) {
           this.settings.data = response.data
@@ -46,16 +48,50 @@ window.app = Vue.createApp({
       }
     },
     async updateSettings() {
-      try {
-        await LNbits.api.request(
-          'PUT',
-          '/sellcoins/api/v1/settings',
-          this.g.user.wallets[0].adminkey,
-          this.settings.data
-        )
-        LNbits.utils.notifySuccess('Settings updated successfully')
-      } catch (err) {
-        LNbits.utils.notifyApiError(err)
+      const settings = {
+        wallet_id: this.settings.wallet_id,
+        launch_page: this.settings.launch_page,
+        stripe_key: this.settings.stripe_key,
+        fiat: this.settings.fiat,
+        title: this.settings.title,
+        description: this.settings.description,
+        user_id: this.settings.user_id
+      }
+      this.settings.user_id = this.g.user.id
+      this.settings.wallet_id = this.settings.wallet_id.value
+      if(
+        this.settings.stripe_key && 
+        this.settings.fiat &&
+        this.settings.wallet_id &&
+        this.settings.title &&
+        this.settings.description
+      ) {
+        try {
+          console.log(settings)
+          await LNbits.api
+          .request(
+            'PUT',
+            '/sellcoins/api/v1/settings',
+            this.g.user.wallets[0].adminkey,
+            settings,
+          )
+          .then(response => {
+            LNbits.utils.notifySuccess('Settings updated successfully')
+            if (response.data) {
+              console.log(response.data)
+              this.settings.data = response.data
+            }
+          }
+          )
+        } catch (err) {
+          LNbits.utils.notifyApiError(err)
+        }
+      }
+      else{
+        this.$q.notify({
+          type: 'warning',
+          message: 'Please complete all fields.'
+        })
       }
     },
     async createProduct(productData) {
