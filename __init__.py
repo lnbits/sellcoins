@@ -11,8 +11,7 @@ from .views_api import sellcoins_api_router
 from .views_lnurl import sellcoins_lnurl_router
 
 logger.debug(
-    "This logged message is from sellcoins/__init__.py, you can debug in your "
-    "extension using 'import logger from loguru' and 'logger.debug(<thing-to-log>)'."
+    "Sellcoins running and ready to sell coins!"
 )
 
 

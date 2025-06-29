@@ -1,5 +1,3 @@
-# Description: This file contains the CRUD operations for talking to the database.
-
 from typing import List, Optional, Union
 
 from lnbits.db import Database
@@ -33,7 +31,6 @@ async def update_settings(data: Settings) -> Settings:
 
 
 async def create_order(data: Order) -> Order:
-    data.id = urlsafe_short_hash()
     await db.insert("sellcoins.Order", data)
     return Order(**data.dict())
 
@@ -83,8 +80,6 @@ async def get_products(setting_id: Union[str, List[str]]) -> List[Product]:
         {"id": setting_id},
         Product,
     )
-
-
 
 async def delete_product(product_id: str) -> None:
     await db.execute(

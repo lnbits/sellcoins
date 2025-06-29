@@ -1,10 +1,10 @@
-# Description: This file contains the extensions API endpoints.
-
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, Request
 from lnbits.core.models import WalletTypeInfo
 from lnbits.decorators import require_admin_key, require_invoice_key
+from lnbits.utils.exchange_rates import btc_rates
+from lnbits.core.services import create_invoice
 from starlette.exceptions import HTTPException
 
 from .crud import (
@@ -88,20 +88,28 @@ async def api_create_order(data: Order) -> Order:
     product = await get_product(data.product_id)
     settings = await get_settings(product.settings_id)
     if settings.auto_convert:
-        rate = await = btc_rates(settings.denomination)
-        sats = (100 / rate) * 100_000_000
+        rate = await btc_rates(settings.denomination)
+        sats = (100 / int(rate)) * 100_000_000
         amount = sats * (1 + settings.haircut_amount / 100)
     else:
         amount = product.price
-    payment = await create_invoice(
-            wallet_id=settings.wallet_id,
-            amount=amount,
-            memo=f"Sellcoins ransaction for {product.title}",
-            extra={
-                "tag": "sellcoins"
-            },
-        )
+        try:
+            payment = await create_invoice(
+                wallet_id=settings.wallet_id,
+                amount=amount,
+                memo=f"Sellcoins ransaction for {product.title}",
+                extra={
+                    "tag": "sellcoins"
+                },
+            )
+        except Exception as e:
+            logger.error(f"Error creating invoice: {e}")
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Failed to create invoice.",
+            )
     data.id = payment.checking_id
+    data.product_id = product.id
     await create_order(data)
     return payment
 

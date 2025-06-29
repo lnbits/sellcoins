@@ -1,5 +1,3 @@
-# Description: Add your page endpoints here.
-
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -7,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 from lnbits.helpers import template_renderer
-
+from lnbits.settings import settings
 from .crud import get_order, get_products, get_settings
 
 sellcoins_generic_router = APIRouter()
@@ -29,6 +27,12 @@ async def index(req: Request, user: User = Depends(check_user_exists)):
 
 # Frontend shareable page
 
+@sellcoins_generic_router.get("/products/{settings_id}")
+async def get_products_page(req: Request, settings_id: str):
+    products = await get_products(settings_id)
+    return sellcoins_renderer().TemplateResponse(
+        "sellcoins/products.html", {"request": req, "products": products}
+    )
 
 @sellcoins_generic_router.get("/order/{order_id}")
 async def get_order_page(req: Request, order_id: str):
@@ -42,28 +46,19 @@ async def get_order_page(req: Request, order_id: str):
         {"request": req, "order": order},
     )
 
-
-@sellcoins_generic_router.get("/products/{settings_id}")
-async def get_products_page(req: Request, user: User = Depends(check_user_exists)):
-    products = await get_products(user.wallet_ids)
-    return sellcoins_renderer().TemplateResponse(
-        "sellcoins/products.html", {"request": req, "products": products}
-    )
-
-
 # Manifest for public page
 
 
 @sellcoins_generic_router.get("/manifest/{settings_id}.webmanifest")
 async def manifest(settings_id: str):
-    settings = await get_settings(settings_id)
-    if not settings:
+    sellcoins_settings = await get_settings(settings_id)
+    if not sellcoins_settings:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Settings do not exist."
         )
     return {
         "short_name": settings.lnbits_site_title,
-        "name": settings.title + " - " + settings.lnbits_site_title,
+        "name": sellcoins_settings.name + " - " + settings.lnbits_site_title,
         "icons": [
             {
                 "src": (
@@ -83,9 +78,9 @@ async def manifest(settings_id: str):
         "theme_color": "#1F2234",
         "shortcuts": [
             {
-                "name": settings.title + " - " + settings.lnbits_site_title,
-                "short_name": settings.title,
-                "description": settings.title + " - " + settings.lnbits_site_title,
+                "name": sellcoins_settings.name+ " - " + settings.lnbits_site_title,
+                "short_name": sellcoins_settings.name,
+                "description": sellcoins_settings.name + " - " + settings.lnbits_site_title,
                 "url": "/sellcoins/" + settings_id,
             }
         ],
