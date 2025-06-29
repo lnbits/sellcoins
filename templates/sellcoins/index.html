@@ -4,42 +4,41 @@
 {% endblock %} {% block page %}
 <div class="row q-col-gutter-md">
   <div class="col-12 col-md-8 col-lg-7 q-gutter-y-md">
-    <q-card-section>
-      <h3 class="q-my-none">
-        <small>
-          Sell {{LNBITS_DENOMINATION}} for <span v-text="settings.fiat"></span>
-        </small>
-      </h3>
+    <h3 class="q-my-none">
+      <small>
+        Sell {{LNBITS_DENOMINATION}} for <span v-text="settings.fiat"></span>
+      </small>
+    </h3>
     <q-card>
       <q-card-section>
         <strong>Settings</strong>
         <div class="row">
           <div class="col-md-3 col-sm-6">
             <q-input
-            class="q-pr-md q-pt-sm"
-            filled
-            dense
-            v-model.trim="settings.title"
-            label="Title for the sale page"
-          ></q-input>
+              class="q-pr-md q-pt-sm"
+              filled
+              dense
+              v-model.trim="settings.title"
+              label="Title for the sale page"
+            ></q-input>
           </div>
           <div class="col-md-4 col-sm-6">
             <q-input
-            class="q-pr-md q-pt-sm"
-            filled
-            dense
-            v-model.trim="settings.description"
-            label="Description for the sale page"
-          ></q-input>
+              class="q-pr-md q-pt-sm"
+              filled
+              dense
+              v-model.trim="settings.description"
+              label="Description for the sale page"
+            ></q-input>
           </div>
           <div class="col-md-3 col-sm-6">
             <q-input
-            class="q-pr-md q-pt-sm"
-            filled
-            dense
-            v-model.trim="settings.header_mage"
-            label="Header image url (1200x250px)"
-          ></q-input>
+              class="q-pr-md q-pt-sm"
+              filled
+              dense
+              v-model.trim="settings.header_mage"
+              label="Header image url (1200x250px)"
+            ></q-input>
           </div>
           <div class="col-md-2 col-sm-6">
             <q-select
@@ -62,7 +61,8 @@
               v-model="settings.send_wallet_id"
               :options="g.user.walletOptions"
               label="Send wallet *"
-            ><q-tooltip>Wallet you will send to</q-tooltip></q-select>
+              ><q-tooltip>Wallet you will send to</q-tooltip></q-select
+            >
           </div>
           <div class="col-md-3 col-sm-6">
             <q-select
@@ -72,20 +72,24 @@
               v-model="settings.receive_wallet_id"
               :options="g.user.walletOptions"
               label="Receive wallet *"
-            ><q-tooltip>Wallet you will send from</q-tooltip></q-select>
+              ><q-tooltip>Wallet you will send from</q-tooltip></q-select
+            >
           </div>
 
           <div class="col-md-3 col-sm-6">
             <q-toggle
-            v-if="product.amount == null"
-            class="q-pr-md q-pt-sm"
-            size="md"
-            v-model="settings.auto_convert"
-            checked-icon="check"
-            color="green"
-            unchecked-icon="clear"
-            :label="settings.auto_convert ? 'Auto-convert (on)' : 'Auto-convert (off)'"
-          ><q-tooltip>Will auto convert sats amount from your fiat price</q-tooltip></q-toggle>
+              v-if="product.amount == null"
+              class="q-pr-md q-pt-sm"
+              size="md"
+              v-model="settings.auto_convert"
+              checked-icon="check"
+              color="green"
+              unchecked-icon="clear"
+              :label="settings.auto_convert ? 'Auto-convert (on)' : 'Auto-convert (off)'"
+              ><q-tooltip
+                >Will auto convert sats amount from your fiat price</q-tooltip
+              ></q-toggle
+            >
           </div>
           <div class="col-md-3 col-sm-6">
             <q-input
@@ -98,124 +102,133 @@
               placeholder="2"
             ></q-input>
           </div>
-      </div>
-      <q-expansion-item
-      expand-separator
-      icon="email"
-      label="Email settings (advanced)"
-    >
-      <q-card>
-        <q-card-section>
-          If you setup connect to an smtp email server you can send emails to users who purchase your products.<br/>
-          Once a product is paid for you can send an email to the user with the withdraw link.
-          <div class="row q-mt-md">
-            <div class="col-md-3 col-sm-12">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                v-model.trim="settings.email_server"
-                label="Email server (SMTP)"
-              ></q-input>
-            </div>
-            <div class="col-md-2 col-sm-6">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                type="number"
-                v-model.trim="settings.email_port"
-                label="Port"
-              ></q-input>
-            </div>
-            <div class="col-md-2 col-sm-6">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                v-model.trim="settings.email_username"
-                label="Username"
-              ></q-input>
-            </div>
-            <div class="col-md-2 col-sm-12">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                type="password"
-                v-model.trim="settings.email_password"
-                label="Password"
-              ></q-input>
-            </div>
-            <div class="col-md-3 col-sm-6">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                v-model.trim="settings.email_from"
-                label="From address"
-              ></q-input>
-            </div>
-          </div>
-    
-          <div class="row q-mt-sm">
+        </div>
+        <q-expansion-item
+          expand-separator
+          icon="email"
+          label="Email settings (advanced)"
+        >
+          <q-card>
+            <q-card-section>
+              If you setup connect to an smtp email server you can send emails
+              to users who purchase your products.<br />
+              Once a product is paid for you can send an email to the user with
+              the withdraw link.
+              <div class="row q-mt-md">
+                <div class="col-md-3 col-sm-12">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    v-model.trim="settings.email_server"
+                    label="Email server (SMTP)"
+                  ></q-input>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    type="number"
+                    v-model.trim="settings.email_port"
+                    label="Port"
+                  ></q-input>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    v-model.trim="settings.email_username"
+                    label="Username"
+                  ></q-input>
+                </div>
+                <div class="col-md-2 col-sm-12">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    type="password"
+                    v-model.trim="settings.email_password"
+                    label="Password"
+                  ></q-input>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    v-model.trim="settings.email_from"
+                    label="From address"
+                  ></q-input>
+                </div>
+              </div>
 
+              <div class="row q-mt-sm">
+                <div class="col-md-3 col-sm-12">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    v-model.trim="settings.email_subject"
+                    label="Email subject"
+                  ></q-input>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                  <q-input
+                    class="q-pr-md q-pt-sm"
+                    filled
+                    dense
+                    v-model.trim="settings.email_message"
+                    type="textarea"
+                    autogrow
+                    label="Email message (payment link will be added below)"
+                  ></q-input>
+                </div>
+                <div class="col-md-9 col-sm-12">
+                  <q-toggle
+                    size="md"
+                    v-model="settings.email"
+                    checked-icon="check"
+                    color="green"
+                    label="Enable email"
+                    left-label
+                    unchecked-icon="clear"
+                    :disable="!settings.email_message && !settings.email_subject && !settings.email_from && !settings.email_password && !settings.email_username && !settings.email_server"
+                    ><q-tooltip>Launch page</q-tooltip></q-toggle
+                  >
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
 
-            <div class="col-md-3 col-sm-12">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                v-model.trim="settings.email_subject"
-                label="Email subject"
-              ></q-input>
-            </div>
-            <div class="col-md-9 col-sm-12">
-              <q-input
-              class="q-pr-md q-pt-sm"
-                filled
-                dense
-                v-model.trim="settings.email_message"
-                type="textarea"
-                autogrow
-                label="Email message (payment link will be added below)"
-              ></q-input>
-            </div>
-            <div class="col-md-9 col-sm-12">
-            <q-toggle
+        <div class="row">
+          <q-toggle
             size="md"
-            v-model="settings.email"
+            v-model="settings.launch_page"
             checked-icon="check"
             color="green"
-            label="Enable email"
+            label="Launch Public Page"
             left-label
             unchecked-icon="clear"
-            :disable="!settings.email_message && !settings.email_subject && !settings.email_from && !settings.email_password && !settings.email_username && !settings.email_server"
-          ><q-tooltip>Launch page</q-tooltip></q-toggle></div>
-          </div>
-    
-        </q-card-section>
-      </q-card>
-    </q-expansion-item>
-    
-      <div class="row">
-       <q-toggle
-          size="md"
-          v-model="settings.launch_page"
-          checked-icon="check"
-          color="green"
-          label="Launch Public Page"
-          left-label
-          unchecked-icon="clear"
-          :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"
-        ><q-tooltip>Launch page</q-tooltip></q-toggle>
-        <q-btn rounded color="secondary" class="q-mt-sm" size="sm" label="update" @click="updateSettings">
-          <q-tooltip>Update</q-tooltip>
-        </q-btn>
-      </div>
+            :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"
+            ><q-tooltip>Launch page</q-tooltip></q-toggle
+          >
+          <q-btn
+            rounded
+            color="secondary"
+            class="q-mt-sm"
+            size="sm"
+            label="update"
+            @click="updateSettings"
+          >
+            <q-tooltip>Update</q-tooltip>
+          </q-btn>
+        </div>
       </q-card-section>
     </q-card>
-    
+
     <q-btn
       unelevated
       color="primary"
@@ -246,38 +259,36 @@
   <!--//////////////FORM DIALOG////////////////////////-->
   <!--/////////////////////////////////////////////////-->
 
-  <q-dialog
-    v-model="show_product_form"
-    position="top"
-    @hide="closeFormDialog"
-  >
+  <q-dialog v-model="show_product_form" position="top" @hide="closeFormDialog">
     <q-card class="q-pa-lg q-pt-xl" style="width: 500px">
       <q-form @submit="createProduct" class="q-gutter-md">
-        <q-input
-          filled
-          dense
-          v-model.trim="product.title"
-          label="Title"
-        ><q-tooltip>Title for your product</q-tooltip></q-input>
+        <q-input filled dense v-model.trim="product.title" label="Title"
+          ><q-tooltip>Title for your product</q-tooltip></q-input
+        >
         <q-input
           filled
           dense
           v-model.trim="product.description"
           label="Description"
-        ><q-tooltip>Description for your product</q-tooltip></q-input>
+          ><q-tooltip>Description for your product</q-tooltip></q-input
+        >
         <q-input
-        filled
-        dense
-        v-model.trim="product.amount"
-        label="Amount you want to sell"
-      ><q-tooltip>Amount the user will recieve</q-tooltip></q-input>
+          filled
+          dense
+          v-model.trim="product.amount"
+          label="Amount you want to sell"
+          ><q-tooltip>Amount the user will recieve</q-tooltip></q-input
+        >
         <q-input
-        v-if="settings.auto_convert == false"
+          v-if="settings.auto_convert == false"
           filled
           dense
           v-model.trim="product.price"
           :label="'Price ' + settings.fiat"
-        ><q-tooltip>How much you will sell your product for</q-tooltip></q-input>
+          ><q-tooltip
+            >How much you will sell your product for</q-tooltip
+          ></q-input
+        >
         <div class="row q-mt-lg">
           <q-btn v-if="product.id" unelevated color="primary" type="submit"
             >Update Product</q-btn

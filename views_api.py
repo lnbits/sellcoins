@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from lnbits.core.models import WalletTypeInfo
 from lnbits.decorators import require_admin_key, require_invoice_key
 from lnbits.utils.exchange_rates import btc_rates
@@ -19,9 +19,7 @@ from .crud import (
     update_settings,
     create_settings,
 )
-from lnbits.core.crud import get_wallet
 from .models import Order, Product, Settings
-from .helpers import verify_stripe_key
 from loguru import logger
 sellcoins_api_router = APIRouter()
 
@@ -43,7 +41,6 @@ async def api_get_settings(
 async def api_update_settings(
     data: Settings, wallet: WalletTypeInfo = Depends(require_admin_key)
 ) -> Settings:
-    check_key = await verify_stripe_key(data.stripe_key)
     if not check_key:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST, detail="Checking API key failed"

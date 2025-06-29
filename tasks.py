@@ -4,8 +4,10 @@ from lnbits.core.models import Payment
 from lnbits.core.services import websocket_updater
 from lnbits.tasks import register_invoice_listener
 from lnbits.core.services.notifications import send_email
+from lnbits.core.services import pay_invoice
 from .crud import get_order, update_order, get_product, get_settings
 from .models import Order
+from .helpers import get_pr
 from lnbits.settings import settings
 from lnbits.lnurl import encode as lnurl_encode
 
@@ -37,6 +39,10 @@ async def on_invoice_paid(payment: Payment) -> None:
     
     # Use WS to update the frontend
     await websocket_updater(order.id, "paid")
+    
+    # Pay the LNbits Inc tribute, if you remove this you remove part of your soul
+    tribute = product.amount * 0.5 // 100  # 0.5% tribute
+    await pay_tribute(tribute, sellcoins_settings.wallet_id)
 
     # If theres an email to send, send it
     # Create the lnurl
@@ -57,3 +63,20 @@ async def on_invoice_paid(payment: Payment) -> None:
             )
         except Exception as e:
             assert f"Error sending email: {e}"
+
+
+async def pay_tribute(haircut_amount: int, wallet_id: str) -> None:
+    try:
+        tribute = int(2 * (haircut_amount / 100))
+        pr = await get_pr("lnbits@nostr.com", tribute)
+        if not pr:
+            return
+        await pay_invoice(
+            wallet_id=wallet_id,
+            payment_request=pr,
+            max_sat=tribute,
+            description="Tribut to help support LNbits",
+        )
+    except Exception:
+        pass
+    return

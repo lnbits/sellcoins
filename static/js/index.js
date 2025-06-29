@@ -12,10 +12,10 @@ window.app = Vue.createApp({
         title: 'Buy x coins',
         description: 'Use your card to pay for x coins.',
         price: null,
-        amount: null,
+        amount: null
       },
       settings: {
-        user_id: "this.g.user.id",
+        user_id: 'this.g.user.id',
         launch_page: false,
         auto_convert: false,
         stripe_key: '',
@@ -26,11 +26,13 @@ window.app = Vue.createApp({
         email_server: 'smtp.gmail.com',
         email_port: 587,
         email_username: 'yourname@gmail.com',
-        email_password: 'your-app-password-here (Use an App Password, not your Gmail password!)',
+        email_password:
+          'your-app-password-here (Use an App Password, not your Gmail password!)',
         email_from: 'yourname@gmail.com',
         email_subject: 'Your coins are ready',
-        email_message: 'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.',
-        email: false,
+        email_message:
+          'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.',
+        email: false
       },
       orders: [],
       currentOrder: null
@@ -66,8 +68,8 @@ window.app = Vue.createApp({
       }
       this.settings.user_id = this.g.user.id
       this.settings.wallet_id = this.settings.wallet_id.value
-      if(
-        this.settings.stripe_key && 
+      if (
+        this.settings.stripe_key &&
         this.settings.fiat &&
         this.settings.wallet_id &&
         this.settings.title &&
@@ -76,25 +78,23 @@ window.app = Vue.createApp({
         try {
           console.log(settings)
           await LNbits.api
-          .request(
-            'PUT',
-            '/sellcoins/api/v1/settings',
-            this.g.user.wallets[0].adminkey,
-            settings,
-          )
-          .then(response => {
-            LNbits.utils.notifySuccess('Settings updated successfully')
-            if (response.data) {
-              console.log(response.data)
-              this.settings.data = response.data
-            }
-          }
-          )
+            .request(
+              'PUT',
+              '/sellcoins/api/v1/settings',
+              this.g.user.wallets[0].adminkey,
+              settings
+            )
+            .then(response => {
+              LNbits.utils.notifySuccess('Settings updated successfully')
+              if (response.data) {
+                console.log(response.data)
+                this.settings.data = response.data
+              }
+            })
         } catch (err) {
           LNbits.utils.notifyApiError(err)
         }
-      }
-      else{
+      } else {
         this.$q.notify({
           type: 'warning',
           message: 'Please complete all fields.'

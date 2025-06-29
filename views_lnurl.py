@@ -5,7 +5,7 @@ import shortuuid
 from fastapi import APIRouter, Request
 from lnbits.core.services import pay_invoice
 
-from .crud import get_order, get_product, get_settings
+from .crud import get_order, get_product, get_settings, update_order
 
 sellcoins_lnurl_router = APIRouter()
 

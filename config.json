@@ -1,5 +1,5 @@
 {
-  "name": "SellCoins",
+  "name": "Sell Coins",
   "short_description": "Sell coins for fiat",
   "tile": "https://raw.githubusercontent.com/lnbits/sellcoins/refs/heads/master/static/image/sellcoins.png",
   "min_lnbits_version": "1.0.0",
