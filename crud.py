@@ -11,14 +11,13 @@ db = Database("ext_sellcoins")
 
 
 async def create_settings(data: Settings) -> Settings:
-    data.id = urlsafe_short_hash()
     await db.insert("sellcoins.settings", data)
     return Settings(**data.dict())
 
 async def get_settings(user_id: str) -> Optional[Settings]:
     return await db.fetchone(
-        "SELECT * FROM sellcoins.settings WHERE user_id = :user_id",
-        {"user_id": user_id},
+        "SELECT * FROM sellcoins.settings WHERE id = :id",
+        {"id": user_id},
         Settings,
     )
 

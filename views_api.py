@@ -27,9 +27,9 @@ sellcoins_api_router = APIRouter()
 
 @sellcoins_api_router.get("/api/v1/settings")
 async def api_get_settings(
-    wallet: WalletTypeInfo = Depends(require_invoice_key),
+    wallet: WalletTypeInfo = Depends(require_admin_key),
 ) -> Settings:
-    settings = await get_settings(wallet.wallet.id)
+    settings = await get_settings(wallet.wallet.user)
     if not settings:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Settings not found."
@@ -41,12 +41,9 @@ async def api_get_settings(
 async def api_update_settings(
     data: Settings, wallet: WalletTypeInfo = Depends(require_admin_key)
 ) -> Settings:
-    if not check_key:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail="Checking API key failed"
-        )
-    settings = await get_settings(wallet.user)
+    settings = await get_settings(wallet.wallet.user)
     if not settings:
+        data.id = wallet.wallet.user
         return await create_settings(data)
     data.wallet_id = wallet.wallet.id
     return await update_settings(data)

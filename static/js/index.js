@@ -15,24 +15,22 @@ window.app = Vue.createApp({
         amount: null
       },
       settings: {
-        user_id: 'this.g.user.id',
-        launch_page: false,
-        auto_convert: false,
-        stripe_key: '',
-        fiat: 'USD',
-        wallet_id: '',
+        denomination: 'USD',
+        send_wallet_id: '',         // Added
+        receive_wallet_id: '',      // Added
         title: 'Buy coins',
         description: 'Use your card to pay for coins.',
+        header_mage: '',            // Added
+        haircut: 0,                 // Added
+        auto_convert: false,
+        email: false,
         email_server: 'smtp.gmail.com',
         email_port: 587,
         email_username: 'yourname@gmail.com',
-        email_password:
-          'your-app-password-here (Use an App Password, not your Gmail password!)',
+        email_password: 'your-app-password-here (Use an App Password, not your Gmail password!)',
         email_from: 'yourname@gmail.com',
         email_subject: 'Your coins are ready',
-        email_message:
-          'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.',
-        email: false
+        email_message: 'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.'
       },
       orders: [],
       currentOrder: null
@@ -47,60 +45,70 @@ window.app = Vue.createApp({
         const response = await LNbits.api.request(
           'GET',
           '/sellcoins/api/v1/settings',
-          this.g.user.wallets[0].admminkey
+          this.g.user.wallets[0].adminkey
         )
-        if (!response.data.wallet_id) {
-          this.settings.data = response.data
-        }
+        this.settings = response.data
+        console.log(this.settings)
       } catch (err) {
         LNbits.utils.notifyApiError(err)
       }
     },
     async updateSettings() {
+      // Build the settings object with all possible params
       const settings = {
-        wallet_id: this.settings.wallet_id,
-        launch_page: this.settings.launch_page,
-        stripe_key: this.settings.stripe_key,
-        fiat: this.settings.fiat,
+        denomination: this.settings.denomination,
+        send_wallet_id: this.settings.send_wallet_id.value,
+        receive_wallet_id: this.settings.receive_wallet_id.value,
         title: this.settings.title,
         description: this.settings.description,
-        user_id: this.settings.user_id
+        header_mage: this.settings.header_mage,
+        haircut: this.settings.haircut,
+        auto_convert: this.settings.auto_convert || false,
+      };
+      if (this.settings.email){
+        settings = {
+          email: this.settings.email,
+          email_server: this.settings.email_server,
+          email_port: this.settings.email_port,
+          email_username: this.settings.email_username,
+          email_password: this.settings.email_password,
+          email_from: this.settings.email_from,
+          email_subject: this.settings.email_subject,
+          email_message: this.settings.email_message
+        }
       }
-      this.settings.user_id = this.g.user.id
-      this.settings.wallet_id = this.settings.wallet_id.value
+      // Check required fields
       if (
-        this.settings.stripe_key &&
-        this.settings.fiat &&
-        this.settings.wallet_id &&
-        this.settings.title &&
-        this.settings.description
+        settings.denomination &&
+        settings.send_wallet_id &&
+        settings.receive_wallet_id &&
+        settings.title &&
+        settings.description &&
+        (settings.haircut !== null && settings.haircut !== undefined)
       ) {
         try {
-          console.log(settings)
-          await LNbits.api
-            .request(
-              'PUT',
-              '/sellcoins/api/v1/settings',
-              this.g.user.wallets[0].adminkey,
-              settings
-            )
-            .then(response => {
-              LNbits.utils.notifySuccess('Settings updated successfully')
-              if (response.data) {
-                console.log(response.data)
-                this.settings.data = response.data
-              }
-            })
+          console.log(settings);
+          const response = await LNbits.api.request(
+            'PUT',
+            '/sellcoins/api/v1/settings',
+            this.g.user.wallets[0].adminkey,
+            settings
+          );
+          LNbits.utils.notifySuccess('Settings updated successfully');
+          if (response.data) {
+            console.log(response.data);
+            this.settings.data = response.data;
+          }
         } catch (err) {
-          LNbits.utils.notifyApiError(err)
+          LNbits.utils.notifyApiError(err);
         }
       } else {
         this.$q.notify({
           type: 'warning',
-          message: 'Please complete all fields.'
-        })
+          message: 'Please complete all required fields.'
+        });
       }
-    },
+    },    
     async createProduct(productData) {
       try {
         const response = await LNbits.api.request(
@@ -184,8 +192,7 @@ window.app = Vue.createApp({
     }
   },
   async created() {
-    this.settings.wallet_id = this.g.user.walletOptions[0]
-    // await this.getSettings()
+    await this.getSettings()
     //  await this.getProducts();
     LNbits.api
       .request('GET', '/api/v1/currencies')

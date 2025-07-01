@@ -46,7 +46,7 @@
               filled
               dense
               emit-value
-              v-model="settings.fiat"
+              v-model="settings.denomination"
               :options="currencyOptions"
               label="Currency you'll denominate your products in"
             ></q-select>
@@ -209,7 +209,7 @@
             v-model="settings.launch_page"
             checked-icon="check"
             color="green"
-            label="Launch Public Page"
+            label="Launch Public Prodcuts Page"
             left-label
             unchecked-icon="clear"
             :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"

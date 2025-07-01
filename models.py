@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 class Settings(BaseModel):
-    user_id: Optional[str] = ""
+    id: Optional[str] = ""
     denomination: Optional[str] = ""
     send_wallet_id: Optional[str] = ""
     receive_wallet_id: Optional[str] = ""
