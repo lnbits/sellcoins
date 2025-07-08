@@ -11,7 +11,7 @@ async def m001_initial(db):
             receive_wallet_id TEXT NOT NULL,
             title TEXT NOT NULL,
             description TEXT NOT NULL,
-            header_mage TEXT NOT NULL,
+            header_image TEXT NOT NULL,
             haircut INTEGER,
             auto_convert BOOLEAN,
             email BOOLEAN,
@@ -50,13 +50,13 @@ async def m003_initial(db):
     Initial templates table.
     """
     await db.execute(
-        """
+       f"""
         CREATE TABLE sellcoins.orders (
             id TEXT PRIMARY KEY NOT NULL,
             product_id TEXT NOT NULL,
             email_to TEXT,
             status TEXT NOT NULL,
-            created TEXT NOT NULL
+            created_at TIMESTAMP NOT NULL DEFAULT {db.timestamp_now}
         );
     """
     )

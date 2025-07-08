@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
+from datetime import datetime, timezone
 
 class Settings(BaseModel):
     id: Optional[str] = ""
@@ -8,7 +9,7 @@ class Settings(BaseModel):
     receive_wallet_id: Optional[str] = ""
     title: Optional[str] = ""
     description: Optional[str] = ""
-    header_mage: Optional[str] = ""
+    header_image: Optional[str] = ""
     haircut: Optional[int] = ""
     auto_convert: Optional[bool]
     email: Optional[bool]
@@ -31,6 +32,6 @@ class Product(BaseModel):
 class Order(BaseModel):
     id: Optional[str] = ""
     product_id: Optional[str] = ""
-    email_to: Optional[str] = ""
-    status: Optional[str] = "" # "pending", "completed", "cancelled"
-    created: Optional[str] = ""
+    email_to: Optional[str] = "ben@lnbits.com"
+    status: Optional[str] = ""
+    created_at: datetime = datetime.now(timezone.utc)

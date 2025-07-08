@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends
 from lnbits.core.models import WalletTypeInfo
 from lnbits.decorators import require_admin_key, require_invoice_key
 from lnbits.utils.exchange_rates import btc_rates
-from lnbits.core.services import create_invoice
 from starlette.exceptions import HTTPException
-
+from lnbits.core.services import create_payment_request
+from lnbits.core.models import CreateInvoice, WalletTypeInfo, Payment
 from .crud import (
     create_order,
     create_product,
@@ -45,7 +45,7 @@ async def api_update_settings(
     if not settings:
         data.id = wallet.wallet.user
         return await create_settings(data)
-    data.wallet_id = wallet.wallet.id
+    data.id = wallet.wallet.user
     return await update_settings(data)
 
 
@@ -55,7 +55,6 @@ async def api_update_settings(
 async def api_create_product(
     data: Product, wallet: WalletTypeInfo = Depends(require_admin_key)
 ) -> Product:
-    data.wallet_id = wallet.wallet.id
     return await create_product(data)
 
 
@@ -63,7 +62,7 @@ async def api_create_product(
 async def api_get_products(
     wallet: WalletTypeInfo = Depends(require_invoice_key),
 ) -> list[Product]:
-    return await get_products(wallet.wallet.id)
+    return await get_products(wallet.wallet.user)
 
 
 @sellcoins_api_router.delete("/api/v1/product/{product_id}")
@@ -76,37 +75,46 @@ async def api_delete_product(
 
 ## Order
 
-
-@sellcoins_api_router.post("/api/v1/order", status_code=HTTPStatus.CREATED)
-async def api_create_order(data: Order) -> Order:
-    product = await get_product(data.product_id)
+@sellcoins_api_router.get("/api/v1/order/{product_id}", status_code=HTTPStatus.CREATED)
+async def api_create_order(product_id: str) -> Payment:
+    product = await get_product(product_id)
     settings = await get_settings(product.settings_id)
-    if settings.auto_convert:
-        rate = await btc_rates(settings.denomination)
-        sats = (100 / int(rate)) * 100_000_000
-        amount = sats * (1 + settings.haircut_amount / 100)
-    else:
+    logger.debug(settings)
+    if product.price:
         amount = product.price
-        try:
-            payment = await create_invoice(
-                wallet_id=settings.wallet_id,
-                amount=amount,
-                memo=f"Sellcoins ransaction for {product.title}",
-                extra={
-                    "tag": "sellcoins"
-                },
-            )
-        except Exception as e:
-            logger.error(f"Error creating invoice: {e}")
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="Failed to create invoice.",
-            )
-    data.id = payment.checking_id
-    data.product_id = product.id
-    await create_order(data)
-    return payment
+    else:
+        amount = product.amount
+    orderData = Order(
+        product_id=product_id,
+        status="unpaid"
+    )
+    order = await create_order(orderData)
+    rate = await btc_rates(settings.denomination)
+    try:
+        invoice_data = CreateInvoice(
+            unit=settings.denomination,
+            out=False,
+            fiat_provider="stripe",
+            amount=amount,
+            memo=f"{settings.title}, Order ID:{order.id}",
+            extra={
+                "tag": "sellcoins",
+                "order_id": order.id,
+                "amount": product.amount,
+                "haircut": settings.haircut,
+                "product_id": product.id,
+            },
+        )
+        logger.debug(settings.receive_wallet_id)
+        logger.debug(invoice_data)
+        payment_request = await create_payment_request(settings.receive_wallet_id, invoice_data)
+        logger.debug(payment_request)
+        return payment_request
 
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
+        ) from exc
 
 @sellcoins_api_router.get("/api/v1/order/{order_id}")
 async def api_get_order(order_id: str) -> Order:

@@ -1,63 +1,35 @@
 {% extends "public.html" %} {% block page %}
+
 <div class="row q-col-gutter-md justify-center">
-  <div class="col-12 col-sm-6 col-md-5 col-lg-4">
-    <q-card class="q-pa-lg">
-      <q-card-section class="q-pa-none">
-        <div class="text-center">
-          <a class="text-secondary" href="lightning:{{ lnurl }}">
-            <q-responsive :ratio="1" class="q-mx-md">
-              <lnbits-qrcode
-                :value="qrValue"
-                :options="{width: 800}"
-                class="rounded-borders"
-              ></lnbits-qrcode>
-            </q-responsive>
-          </a>
-        </div>
-        <div class="row q-mt-lg q-gutter-sm">
-          <q-btn outline color="grey" @click="copyText(qrValue)"
-            >Copy Withdraw
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
-  </div>
-  <div class="col-12 col-sm-6 col-md-5 col-lg-4 q-gutter-y-md">
-    <q-card>
+  <div
+  class="q-pa-xl text-white"
+  :style="`background-image: url('${header_image}'); background-size: cover; background-position: center;`"
+>
+<center>
+  <span class="text-h2" v-text="title"></span>
+  <br/>
+  <span class="text-h6" v-text="description"></span>
+</center>
+</div></div>
+<div class="row q-col-gutter-md justify-center">
+  <div class="q-gutter-md row wrap justify-start">
+
+    <q-card
+      v-for="product in products"
+      :key="product.id"
+      class="q-ma-sm"
+      style="width: 200px"
+    >
       <q-card-section>
-        <h4
-          v-text="settings.title"
-          class="text-subtitle1 q-mb-sm q-mt-none"
-        ></h4>
-        <p class="q-my-none" v-text="settings.description"></p
-      ></q-card-section>
-      <q-card-section class="q-pa-none">
-        <q-separator></q-separator>
-        <q-card for="product in products">
-          <q-card-section>
-            <div class="row">
-              <div class="col-6">
-                <q-badge color="primary" label="Price"></q-badge>
-              </div>
-              <div class="col-6 text-right">
-                <span v-text="product.price"></span>
-                <span v-text="product.fiat"></span>
-              </div>
-            </div>
-          </q-card-section>
-          <q-card-section>
-            <div class="row">
-              <div class="col-6">
-                <q-badge color="primary" label="Amount"></q-badge>
-              </div>
-              <div class="col-6 text -right">
-                <span v-text="product.amount"></span>{{LNBITS_DENOMINATION}}
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+        <div class="text-h4"><span v-text="denomination + ' ' + product.amount"></span></div>
+        <div class="text-h6"><span v-text="product.title"></span></div>
+        <div class="text-subtitle2 text-grey-7"><span v-text="product.description"></span></div>
+      </q-card-section>
+      <q-card-section>
+        <q-btn color="primary" size="md" icon="shopping_cart" label="Buy" @click="createOrder(product.id)"></q-btn>
       </q-card-section>
     </q-card>
+
   </div>
 </div>
 
@@ -66,14 +38,25 @@
 </q-dialog>
 
 <q-dialog v-model="qrcode.show" position="top">
-  <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
-    <q-responsive :ratio="1" class="q-mx-xl q-mb-md">
-      <lnbits-qrcode :value="qrcode.value"></lnbits-qrcode>
-    </q-responsive>
-    <center>
-      <q-btn label="copy" @click="copyText(qrcode.value)"></q-btn>
-    </center>
-  </q-card>
+  <q-card
+  v-if="qrcode.payment_request"
+  class="q-pa-lg q-pt-xl lnbits__dialog-card"
+>
+    <lnbits-qrcode
+      :value="qrcode.payment_request"
+      class="rounded-borders"
+    ></lnbits-qrcode>
+
+  <div class="row q-mt-lg">
+    <q-btn
+      outline
+      color="grey"
+      @click="copyText(qrcode.payment_request)"
+      >Copy invoice</q-btn
+    >
+    <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+  </div>
+</q-card>
 </q-dialog>
 
 {% endblock %} {% block scripts %}
@@ -83,13 +66,17 @@
     mixins: [windowMixin],
     data: function () {
       return {
-        sellcoins_id: '{{sellcoins_id}}',
+        title: '{{ title }}',
+        description: '{{ description }}',
+        products: {{ products | tojson }},
+        denomination: '{{ denomination }}',
         form: {
           show: false
         },
         qrcode: {
           show: false,
-          value: ''
+          payment_request: '',
+          payment_hash: '',
         }
       }
     },
@@ -97,22 +84,26 @@
       copyText: function (text) {
         navigator.clipboard.writeText(text)
       },
-      async getData(sellcoins_id) {
-        await LNbits.api
-          .request('GET', '/sellcoins/api/v1/sellcoins' + sellcoins_id)
-          .then(response => {
-            this.products.push(response.data.products)
-            this.settings.push(response.data.settings)
-            this.form.show = false
-          })
-          .catch(error => {
-            LNbits.utils.notifyApiError(error)
-            this.form.show = false
-          })
-      }
+      async createOrder(productId) {
+        try {
+          const response = await LNbits.api.request(
+            'GET',
+            '/sellcoins/api/v1/order/' + productId
+          )
+          this.qrcode.show = true
+          this.qrcode.payment_request = response.data.extra.fiat_payment_request
+          this.qrcode.payment_hash = response.data.extra.payment_hash
+        } catch (err) {
+          this.$q.notify({
+            type: 'warning',
+            message: 'Failed to create order'
+          });
+        }
+      },
     },
     created: function () {
-      eventReactionWebocket(this.sellcoins_id)
+      console.log(this.products)
+     // eventReactionWebocket(this.sellcoins_id)
     }
   })
 </script>

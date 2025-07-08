@@ -6,8 +6,8 @@ from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 from lnbits.helpers import template_renderer
 from lnbits.settings import settings
-from .crud import get_order, get_products, get_settings
-
+from .crud import get_order, get_product, get_products, get_settings
+from loguru import logger
 sellcoins_generic_router = APIRouter()
 
 
@@ -27,11 +27,27 @@ async def index(req: Request, user: User = Depends(check_user_exists)):
 
 # Frontend shareable page
 
-@sellcoins_generic_router.get("/products/{settings_id}")
-async def get_products_page(req: Request, settings_id: str):
-    products = await get_products(settings_id)
+@sellcoins_generic_router.get("/{product_id}")
+async def get_products_page(req: Request, product_id: str):
+    product = await get_product(product_id)
+    if not product:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Failed to launch product page."
+        )
+    products = await get_products(product.settings_id)
+    if not products:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Failed to launch product page."
+        )
+    settings = await get_settings(product.settings_id)
+    if not settings:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Failed to launch product page."
+        )
+    products_dicts = [p.dict(exclude={"settings_id"}) for p in products]
+    logger.debug(products_dicts)
     return sellcoins_renderer().TemplateResponse(
-        "sellcoins/products.html", {"request": req, "products": products}
+        "sellcoins/products.html", {"request": req, "products": products_dicts, "denomination": settings.denomination, "title": settings.title, "description": settings.description, "header_image": settings.header_image}
     )
 
 @sellcoins_generic_router.get("/order/{order_id}")

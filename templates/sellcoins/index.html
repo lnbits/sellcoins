@@ -202,7 +202,6 @@
             </q-card-section>
           </q-card>
         </q-expansion-item>
-
         <div class="row">
           <q-toggle
             size="md"
@@ -228,19 +227,39 @@
         </div>
       </q-card-section>
     </q-card>
-
+    <h4 class="q-my-none">
+      <small>
+        Products
+      </small>
+    </h4>
     <q-btn
-      unelevated
-      color="primary"
-      icon="add"
-      round
-      size="md"
-      class="q-mt-md"
-      @click="show_product_form = true"
-    ></q-btn>
-    <q-card v-for="product in products">
-      <span v-text="product.price"></span>
-    </q-card>
+    unelevated
+    color="primary"
+    icon="add"
+    round
+    size="md"
+    class="q-mt-md q-mr-md"
+    @click="show_product_form = true"
+  ></q-btn>
+    <br></br>
+    <div class="q-gutter-md row wrap justify-start">
+      <q-card
+        v-for="product in products"
+        :key="product.id"
+        class="q-ma-sm"
+        style="width: 200px"
+      >
+        <q-card-section>
+          <div class="text-h4"><span v-text="settings.denomination + ' ' + product.amount"></span></div>
+          <div class="text-h6"><span v-text="product.title"></span></div>
+          <div class="text-subtitle2 text-grey-7"><span v-text="product.description"></span></div>
+        </q-card-section>
+        <q-card-section>
+          <q-btn round color="red" size="sm" icon="delete" @click="deleteProduct(product.id)"></q-btn>
+          <q-btn round color="blue" size="sm" icon="call_made" :href="'/sellcoins/' + product.id"></q-btn>
+        </q-card-section>
+      </q-card>
+    </div>
   </div>
   <div class="gt-sm col-12 col-md-4 col-lg-5 q-gutter-y-md">
     <q-card>

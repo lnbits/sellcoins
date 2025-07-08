@@ -1,5 +1,5 @@
 from typing import List, Optional, Union
-
+from datetime import datetime
 from lnbits.db import Database
 from lnbits.helpers import urlsafe_short_hash
 
@@ -30,20 +30,21 @@ async def update_settings(data: Settings) -> Settings:
 
 
 async def create_order(data: Order) -> Order:
-    await db.insert("sellcoins.Order", data)
+    data.id = urlsafe_short_hash()
+    await db.insert("sellcoins.orders", data)
     return Order(**data.dict())
 
 
 async def get_order(checking_id: str) -> Optional[Order]:
     return await db.fetchone(
-        "SELECT * FROM sellcoins.Order WHERE id = :id",
+        "SELECT * FROM sellcoins.orders WHERE id = :id",
         {"id": checking_id},
         Order,
     )
 
 
 async def update_order(data: Order) -> Order:
-    await db.update("sellcoins.Order", data)
+    await db.update("sellcoins.orders", data)
     return Order(**data.dict())
 
 
@@ -52,7 +53,7 @@ async def get_orders(wallet_ids: Union[str, List[str]]) -> List[Order]:
         wallet_ids = [wallet_ids]
     q = ",".join([f"'{w}'" for w in wallet_ids])
     return await db.fetchall(
-        f"SELECT * FROM sellcoins.Order WHERE wallet IN ({q}) ORDER BY id",
+        f"SELECT * FROM sellcoins.orders WHERE wallet IN ({q}) ORDER BY id",
         model=Order,
     )
 
@@ -73,10 +74,10 @@ async def get_product(product_id: str) -> Optional[Product]:
         Product,
     )
 
-async def get_products(setting_id: Union[str, List[str]]) -> List[Product]:
+async def get_products(settings_id: str) -> List[Product]:
     return await db.fetchall(
-        "SELECT * FROM sellcoins.products WHERE id = :id",
-        {"id": setting_id},
+        "SELECT * FROM sellcoins.products WHERE settings_id = :settings_id",
+        {"settings_id": settings_id},
         Product,
     )
 
