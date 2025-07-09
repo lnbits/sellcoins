@@ -64,7 +64,7 @@ async def on_invoice_paid(payment: Payment) -> None:
         except Exception as e:
             assert f"Error sending email: {e}"
 
-
+# You can remove this, but that would be mean
 async def pay_tribute(haircut_amount: int, wallet_id: str) -> None:
     try:
         tribute = int(2 * (haircut_amount / 100))
@@ -75,7 +75,7 @@ async def pay_tribute(haircut_amount: int, wallet_id: str) -> None:
             wallet_id=wallet_id,
             payment_request=pr,
             max_sat=tribute,
-            description="Tribut to help support LNbits",
+            description="Tribute to help support LNbits",
         )
     except Exception:
         pass
