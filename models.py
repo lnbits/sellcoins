@@ -32,6 +32,8 @@ class Order(BaseModel):
     email_to: Optional[str] = ""
     nostr_key: Optional[str] = ""
     status: Optional[str] = ""
+    payment_request: Optional[str] = ""
+    payment_hash: Optional[str] = ""
     created_at: datetime = datetime.now(timezone.utc)
 
 class CreateOrder(BaseModel):

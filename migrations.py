@@ -58,3 +58,7 @@ async def m003_initial(db):
         );
     """
     )
+
+async def m004_add_order_payment_details(db):
+    await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN payment_request TEXT")
+    await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN payment_hash TEXT")

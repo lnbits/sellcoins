@@ -14,6 +14,7 @@ from .crud import (
     get_product,
     get_products,
     get_settings,
+    update_order,
     update_settings,
     create_settings,
 )
@@ -105,9 +106,14 @@ async def api_create_order(product_id: str) -> CreateOrder:
         payment = await create_payment_request(
             settings.receive_wallet_id, invoice_data
         )
+        payment_request=payment.extra["fiat_payment_request"]
+
+        order.payment_request = payment_request
+        order.payment_hash = payment.payment_hash
+        await update_order(order)
         createOrder = CreateOrder(
             # payment_request=payment.bolt11,
-            payment_request=payment.extra["fiat_payment_request"], ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
+            payment_request=payment_request, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             order_id=order.id or "",
             payment_hash=payment.payment_hash,
         )

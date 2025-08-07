@@ -24,7 +24,7 @@
         <div class="text-subtitle2 text-grey-7"><span v-text="product.description"></span></div>
       </q-card-section>
       <q-card-section>
-        <q-btn color="primary" size="md" icon="shopping_cart" label="Buy" @click="createOrder(product.id)"></q-btn>
+        <q-btn color="primary" size="md" class="full-width" icon="shopping_cart" label="Buy" @click="createOrder(product.id)"></q-btn>
       </q-card-section>
     </q-card>
 
@@ -83,8 +83,9 @@
           this.qrcode.payment_request = response.data.payment_request
           this.qrcode.checking_id = response.data.payment_hash
           // eventReactionWebocket(this.qrcode.checking_id)
-          this.subscribeToPaymentWS(this.qrcode.checking_id)
-          this.qrcode.show = true
+          // this.subscribeToPaymentWS(this.qrcode.checking_id)
+          // this.qrcode.show = true
+          window.location.href = `/sellcoins/order/${response.data.order_id}`
         } catch (err) {
           console.log(err)
           this.$q.notify({
@@ -95,30 +96,6 @@
       },
       convert_amount(amount) {
         return parseInt((this.exchange_rate * amount - (this.exchange_rate * amount / 100 * parseInt(this.haircut))))
-      },
-      subscribeToPaymentWS(checkingId) {
-        try {
-          console.log('### Subscribing to payment WS for checking ID:', checkingId)
-          const url = new URL(window.location)
-          url.protocol = url.protocol === 'https:' ? 'wss' : 'ws'
-          url.pathname = `/api/v1/ws/${checkingId}`
-          const ws = new WebSocket(url)
-          ws.onmessage = async ({ data }) => {
-            const order_id = JSON.parse(data)
-            Quasar.Notify.create({
-              type: 'positive',
-              message: 'Invoice Paid! Redirecting in 3 seconds...'
-            })
-            this.qrcode.show = false
-            ws.close()
-            setTimeout(() => {
-              window.location.href = `/sellcoins/order/${order_id}`
-            }, 3000)
-          }
-        } catch (err) {
-          console.warn(err)
-          LNbits.utils.notifyApiError(err)
-        }
       },
     },
     created: async function () {
