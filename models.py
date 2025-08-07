@@ -36,4 +36,5 @@ class Order(BaseModel):
 
 class CreateOrder(BaseModel):
     payment_request: str
-    checking_id: str
+    order_id: str
+    payment_hash: str

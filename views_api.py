@@ -107,12 +107,14 @@ async def api_create_order(product_id: str) -> CreateOrder:
         )
         createOrder = CreateOrder(
             # payment_request=payment.bolt11,
-            payment_request=payment.fiat_payment_request, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
-            checking_id=order.id,
+            payment_request=payment.extra["fiat_payment_request"], ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
+            order_id=order.id or "",
+            payment_hash=payment.payment_hash,
         )
         return createOrder
 
     except Exception as exc:
+        logger.warning(exc)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         ) from exc
