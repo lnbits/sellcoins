@@ -6,249 +6,92 @@
   <div class="col-12 col-md-8 col-lg-7 q-gutter-y-md">
     <h3 class="q-my-none">
       <small>
-        Sell {{LNBITS_DENOMINATION}} for <span v-text="settings.fiat"></span>
+        Sell {{LNBITS_DENOMINATION}} for <span v-text="settings.denomination"></span>
       </small>
     </h3>
     <q-card>
-      <q-card-section>
+      <q-expansion-item group="extras" icon="swap_vertical_circle" label="Settings" :content-inset-level="0.5">
         <strong>Settings</strong>
         <div class="row">
-          <div class="col-md-3 col-sm-6">
-            <q-input
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              v-model.trim="settings.title"
-              label="Title for the sale page"
-            ></q-input>
+          <div class="col-6">
+            <q-input class="q-pr-md q-pt-sm" filled dense v-model.trim="settings.title"
+              label="Title for the sale page"></q-input>
           </div>
-          <div class="col-md-4 col-sm-6">
-            <q-input
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              v-model.trim="settings.description"
-              label="Description for the sale page"
-            ></q-input>
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <q-input
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              v-model.trim="settings.header_mage"
-              label="Header image url (1200x250px)"
-            ></q-input>
-          </div>
-          <div class="col-md-2 col-sm-6">
-            <q-select
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              emit-value
-              v-model="settings.denomination"
-              :options="currencyOptions"
-              label="Currency you'll denominate your products in"
-            ></q-select>
+          <div class="col-6">
+            <q-input class="q-pr-md q-pt-sm" filled dense v-model.trim="settings.description"
+              label="Description for the sale page"></q-input>
           </div>
         </div>
         <div class="row">
-          <div class="col-md-3 col-sm-6">
-            <q-select
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              v-model="settings.send_wallet_id"
-              :options="g.user.walletOptions"
-              label="Send wallet *"
-              ><q-tooltip>Wallet you will send to</q-tooltip></q-select
-            >
+          <div class="col-6">
+            <q-input class="q-pr-md q-pt-sm" filled dense v-model.trim="settings.header_mage"
+              label="Header image url (1200x250px)"></q-input>
           </div>
-          <div class="col-md-3 col-sm-6">
-            <q-select
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              v-model="settings.receive_wallet_id"
-              :options="g.user.walletOptions"
-              label="Receive wallet *"
-              ><q-tooltip>Wallet you will send from</q-tooltip></q-select
-            >
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <q-toggle
-              v-if="product.amount == null"
-              class="q-pr-md q-pt-sm"
-              size="md"
-              v-model="settings.auto_convert"
-              checked-icon="check"
-              color="green"
-              unchecked-icon="clear"
-              :label="settings.auto_convert ? 'Auto-convert (on)' : 'Auto-convert (off)'"
-              ><q-tooltip
-                >Will auto convert sats amount from your fiat price</q-tooltip
-              ></q-toggle
-            >
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <q-input
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              type="number"
-              v-model.trim="settings.haircut"
-              label="Haircut"
-              placeholder="2"
-            ></q-input>
+          <div class="col-6">
+            <q-select class="q-pr-md q-pt-sm" filled dense emit-value v-model="settings.denomination"
+              :options="currencyOptions" label="Currency you'll denominate your products in"></q-select>
           </div>
         </div>
-        <q-expansion-item
-          expand-separator
-          icon="email"
-          label="Email settings (advanced)"
-        >
-          <q-card>
-            <q-card-section>
-              If you setup connect to an smtp email server you can send emails
-              to users who purchase your products.<br />
-              Once a product is paid for you can send an email to the user with
-              the withdraw link.
-              <div class="row q-mt-md">
-                <div class="col-md-3 col-sm-12">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    v-model.trim="settings.email_server"
-                    label="Email server (SMTP)"
-                  ></q-input>
-                </div>
-                <div class="col-md-2 col-sm-6">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    type="number"
-                    v-model.trim="settings.email_port"
-                    label="Port"
-                  ></q-input>
-                </div>
-                <div class="col-md-2 col-sm-6">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    v-model.trim="settings.email_username"
-                    label="Username"
-                  ></q-input>
-                </div>
-                <div class="col-md-2 col-sm-12">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    type="password"
-                    v-model.trim="settings.email_password"
-                    label="Password"
-                  ></q-input>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    v-model.trim="settings.email_from"
-                    label="From address"
-                  ></q-input>
-                </div>
-              </div>
-
-              <div class="row q-mt-sm">
-                <div class="col-md-3 col-sm-12">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    v-model.trim="settings.email_subject"
-                    label="Email subject"
-                  ></q-input>
-                </div>
-                <div class="col-md-9 col-sm-12">
-                  <q-input
-                    class="q-pr-md q-pt-sm"
-                    filled
-                    dense
-                    v-model.trim="settings.email_message"
-                    type="textarea"
-                    autogrow
-                    label="Email message (payment link will be added below)"
-                  ></q-input>
-                </div>
-                <div class="col-md-9 col-sm-12">
-                  <q-toggle
-                    size="md"
-                    v-model="settings.email"
-                    checked-icon="check"
-                    color="green"
-                    label="Enable email"
-                    left-label
-                    unchecked-icon="clear"
-                    :disable="!settings.email_message && !settings.email_subject && !settings.email_from && !settings.email_password && !settings.email_username && !settings.email_server"
-                    ><q-tooltip>Launch page</q-tooltip></q-toggle
-                  >
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
         <div class="row">
-          <q-toggle
-            size="md"
-            v-model="settings.launch_page"
-            checked-icon="check"
-            color="green"
-            label="Launch Public Prodcuts Page"
-            left-label
-            unchecked-icon="clear"
-            :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"
-            ><q-tooltip>Launch page</q-tooltip></q-toggle
-          >
-          <q-btn
-            rounded
-            color="secondary"
-            class="q-mt-sm"
-            size="sm"
-            label="update"
-            @click="updateSettings"
-          >
-            <q-tooltip>Update</q-tooltip>
-          </q-btn>
+          <div class="col-6">
+            <q-select class="q-pr-md q-pt-sm" filled dense v-model="settings.send_wallet_id"
+              :options="g.user.walletOptions" label="Send wallet *"><q-tooltip>Wallet you will send
+                to</q-tooltip></q-select>
+          </div>
+          <div class="col-6">
+            <q-select class="q-pr-md q-pt-sm" filled dense v-model="settings.receive_wallet_id"
+              :options="g.user.walletOptions" label="Receive wallet *"><q-tooltip>Wallet you will send
+                from</q-tooltip></q-select>
+          </div>
         </div>
-      </q-card-section>
+        <div class="row">
+          <div class="col-6">
+            <q-input class="q-pr-md q-pt-sm" filled dense type="number" v-model.trim="settings.haircut" label="Haircut"
+              placeholder="2"></q-input>
+          </div>
+          <div class="col-3">
+            <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.auto_convert" checked-icon="check"
+              color="green" unchecked-icon="clear"
+              :label="settings.auto_convert ? 'Auto-convert (on)' : 'Auto-convert (off)'"><q-tooltip>Will auto convert
+                sats amount from your fiat price</q-tooltip></q-toggle>
+          </div>
+          <div class="col-3">
+            <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.launch_page" checked-icon="check"
+              color="green" label="Launch page" unchecked-icon="clear"
+              :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"><q-tooltip>Launch
+                page</q-tooltip></q-toggle>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2">
+            <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.email" checked-icon="check" color="green"
+              unchecked-icon="clear" disable :label="settings.email ? 'Email (on)' : 'Email (off)'"><q-tooltip>To send
+                the buyer their withdraw link over Email (coming soon)</q-tooltip></q-toggle>
+          </div>
+          <div class="col-2">
+            <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.nostr" checked-icon="check" color="green"
+              unchecked-icon="clear" disable :label="settings.nostr ? 'Nostr (on)' : 'Nostr (off)'"><q-tooltip>To send
+                the buyer their withdraw link over Nostr (coming soon)</q-tooltip></q-toggle>
+          </div>
+          <div class="col">
+            <q-btn class="q-mr-md q-mt-md" rounded color="secondary" size="sm" label="update settings"
+              @click="updateSettings">
+              <q-tooltip>Update</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+      </q-expansion-item>
     </q-card>
     <h4 class="q-my-none">
       <small>
         Products
       </small>
     </h4>
-    <q-btn
-    unelevated
-    color="primary"
-    icon="add"
-    round
-    size="md"
-    class="q-mt-md q-mr-md"
-    @click="show_product_form = true"
-  ></q-btn>
+    <q-btn unelevated color="primary" icon="add" round size="md" class="q-mt-md q-mr-md"
+      @click="show_product_form = true"></q-btn>
     <br></br>
     <div class="q-gutter-md row wrap justify-start">
-      <q-card
-        v-for="product in products"
-        :key="product.id"
-        class="q-ma-sm"
-        style="width: 200px"
-      >
+      <q-card v-for="product in products" :key="product.id" class="q-ma-sm" style="width: 200px">
         <q-card-section>
           <div class="text-h4"><span v-text="settings.denomination + ' ' + product.amount"></span></div>
           <div class="text-h6"><span v-text="product.title"></span></div>
@@ -260,6 +103,43 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <q-card>
+      <q-card-section>
+        <div class="row items-center no-wrap q-mb-md">
+          <div class="col">
+            <h5 class="text-subtitle1 q-my-none">Orders</h5>
+          </div>
+          <div class="col-auto">
+            <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
+              <template v-slot:append>
+                <q-icon name="search"></q-icon>
+              </template>
+            </q-input>
+          </div>
+        </div>
+        <q-table flat dense :rows="orders" row-key="id" :columns="ordersTable.columns"
+          v-model:pagination="ordersTable.pagination" :filter="filter">
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props" auto-width>
+                <div v-text="col.label"></div>
+              </q-th>
+              <!-- <q-th auto-width></q-th> -->
+            </q-tr>
+          </template>
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td v-for="col in props.cols" :key="col.name" :props="props" auto-width>
+                <div v-text="col.value"></div>
+              </q-td>
+            </q-tr>
+          </template>
+        </q-table>
+      </q-card-section>
+    </q-card>
+
+
   </div>
   <div class="gt-sm col-12 col-md-4 col-lg-5 q-gutter-y-md">
     <q-card>
@@ -281,41 +161,19 @@
   <q-dialog v-model="show_product_form" position="top" @hide="closeFormDialog">
     <q-card class="q-pa-lg q-pt-xl" style="width: 500px">
       <q-form @submit="createProduct" class="q-gutter-md">
-        <q-input filled dense v-model.trim="product.title" label="Title"
-          ><q-tooltip>Title for your product</q-tooltip></q-input
-        >
-        <q-input
-          filled
-          dense
-          v-model.trim="product.description"
-          label="Description"
-          ><q-tooltip>Description for your product</q-tooltip></q-input
-        >
-        <q-input
-          filled
-          dense
-          v-model.trim="product.amount"
-          label="Amount you want to sell"
-          ><q-tooltip>Amount the user will recieve</q-tooltip></q-input
-        >
-        <q-input
-          v-if="settings.auto_convert == false"
-          filled
-          dense
-          v-model.trim="product.price"
-          :label="'Price ' + settings.fiat"
-          ><q-tooltip
-            >How much you will sell your product for</q-tooltip
-          ></q-input
-        >
+        <q-input filled dense v-model.trim="product.title" label="Title"><q-tooltip>Title for your
+            product</q-tooltip></q-input>
+        <q-input filled dense v-model.trim="product.description" label="Description"><q-tooltip>Description for your
+            product</q-tooltip></q-input>
+        <q-input filled dense v-model.trim="product.amount"
+          :label="settings.denomination + ' amount you want to sell'"><q-tooltip>Amount the user will
+            recieve</q-tooltip></q-input>
+        <q-input v-if="settings.auto_convert == false" filled dense v-model.trim="product.price"
+          :label="'Price ' + settings.fiat"><q-tooltip>How much you will sell your product for</q-tooltip></q-input>
         <div class="row q-mt-lg">
-          <q-btn v-if="product.id" unelevated color="primary" type="submit"
-            >Update Product</q-btn
-          >
+          <q-btn v-if="product.id" unelevated color="primary" type="submit">Update Product</q-btn>
           <q-btn unelevated color="primary" type="submit">Create Product</q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
         </div>
       </q-form>
     </q-card>

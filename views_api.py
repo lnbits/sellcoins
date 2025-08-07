@@ -3,15 +3,13 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends
 from lnbits.core.models import WalletTypeInfo
 from lnbits.decorators import require_admin_key, require_invoice_key
-from lnbits.utils.exchange_rates import btc_rates
 from starlette.exceptions import HTTPException
 from lnbits.core.services import create_payment_request
-from lnbits.core.models import CreateInvoice, WalletTypeInfo, Payment
+from lnbits.core.models import CreateInvoice, WalletTypeInfo
 from .crud import (
     create_order,
     create_product,
     delete_product,
-    get_order,
     get_orders,
     get_product,
     get_products,
@@ -19,11 +17,13 @@ from .crud import (
     update_settings,
     create_settings,
 )
-from .models import Order, Product, Settings
+from .models import Order, Product, Settings, CreateOrder
 from loguru import logger
+
 sellcoins_api_router = APIRouter()
 
 ## SETTINGS
+
 
 @sellcoins_api_router.get("/api/v1/settings")
 async def api_get_settings(
@@ -51,6 +51,7 @@ async def api_update_settings(
 
 ## PRODUCTS
 
+
 @sellcoins_api_router.post("/api/v1/product", status_code=HTTPStatus.CREATED)
 async def api_create_product(
     data: Product, wallet: WalletTypeInfo = Depends(require_admin_key)
@@ -75,57 +76,51 @@ async def api_delete_product(
 
 ## Order
 
+
 @sellcoins_api_router.get("/api/v1/order/{product_id}", status_code=HTTPStatus.CREATED)
-async def api_create_order(product_id: str) -> Payment:
+async def api_create_order(product_id: str) -> CreateOrder:
     product = await get_product(product_id)
     settings = await get_settings(product.settings_id)
-    logger.debug(settings)
     if product.price:
         amount = product.price
     else:
         amount = product.amount
-    orderData = Order(
-        product_id=product_id,
-        status="unpaid"
-    )
+    orderData = Order(product_id=product_id, settings_id=settings.id, status="unpaid")
     order = await create_order(orderData)
-    rate = await btc_rates(settings.denomination)
     try:
         invoice_data = CreateInvoice(
-            unit=settings.denomination,
+            unit=settings.denomination, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             out=False,
-            fiat_provider="stripe",
+            fiat_provider="stripe", ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             amount=amount,
             memo=f"{settings.title}, Order ID:{order.id}",
             extra={
-                "tag": "sellcoins",
+                "tag": "SellCoins",
                 "order_id": order.id,
                 "amount": product.amount,
-                "haircut": settings.haircut,
+                "haircut": f"{settings.haircut}%",
                 "product_id": product.id,
             },
         )
-        logger.debug(settings.receive_wallet_id)
-        logger.debug(invoice_data)
-        payment_request = await create_payment_request(settings.receive_wallet_id, invoice_data)
-        logger.debug(payment_request)
-        return payment_request
+        payment = await create_payment_request(
+            settings.receive_wallet_id, invoice_data
+        )
+        createOrder = CreateOrder(
+            # payment_request=payment.bolt11,
+            payment_request=payment.fiat_payment_request, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
+            checking_id=order.id,
+        )
+        return createOrder
 
     except Exception as exc:
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         ) from exc
 
-@sellcoins_api_router.get("/api/v1/order/{order_id}")
-async def api_get_order(order_id: str) -> Order:
-    order = await get_order(order_id)
-    if not order:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Order not found.")
-    return order
 
-
-@sellcoins_api_router.get("/api/v1/Order")
+@sellcoins_api_router.get("/api/v1/orders/{settings_id}")
 async def api_get_orders(
-    wallet: WalletTypeInfo = Depends(require_invoice_key),
+    settings_id: str,
+    wallet: WalletTypeInfo = Depends(require_admin_key),
 ) -> list[Order]:
-    return await get_orders(wallet.wallet.id)
+    return await get_orders(settings_id)

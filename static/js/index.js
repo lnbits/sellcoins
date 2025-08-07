@@ -16,25 +16,46 @@ window.app = Vue.createApp({
       },
       settings: {
         denomination: 'USD',
-        send_wallet_id: '',         // Added
-        receive_wallet_id: '',      // Added
+        send_wallet_id: '',
+        receive_wallet_id: '',
         title: 'Buy coins',
         description: 'Use your card to pay for coins.',
-        header_mage: '',            // Added
-        haircut: 0,                 // Added
+        header_mage: '',
+        haircut: 0,
         auto_convert: false,
         email: false,
-        email_server: 'smtp.gmail.com',
-        email_port: 587,
-        email_username: 'yourname@gmail.com',
-        email_password: 'your-app-password-here (Use an App Password, not your Gmail password!)',
-        email_from: 'yourname@gmail.com',
-        email_subject: 'Your coins are ready',
-        email_message: 'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.'
+        nostr: false,
+        email_message: 'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.',
+        launch_page: false
       },
       settingsExist: false,
       orders: [],
-      currentOrder: null
+      ordersTable: {
+        columns: [
+          {
+            name: 'id',
+            align: 'left',
+            label: 'ID',
+            field: 'id'
+          },
+          {
+            name: 'product_id',
+            align: 'left',
+            label: 'Product ID',
+            field: 'product_id'
+          },
+          {
+            name: 'status',
+            align: 'left',
+            label: 'Staus',
+            field: 'status',
+            sortable: true
+          }
+        ],
+        pagination: {
+          rowsPerPage: 10
+        }
+      },
     }
   },
   methods: {
@@ -53,7 +74,8 @@ window.app = Vue.createApp({
         this.settingsExist = true
         await this.getProducts();
       } catch (err) {
-        LNbits.utils.notifyApiError(err)
+        console.log(err)
+        console.log(this.settings)
       }
     },
     async updateSettings() {
@@ -67,19 +89,11 @@ window.app = Vue.createApp({
         header_mage: this.settings.header_mage,
         haircut: this.settings.haircut,
         auto_convert: this.settings.auto_convert || false,
-      };
-      if (this.settings.email){
-        settings = {
-          email: this.settings.email,
-          email_server: this.settings.email_server,
-          email_port: this.settings.email_port,
-          email_username: this.settings.email_username,
-          email_password: this.settings.email_password,
-          email_from: this.settings.email_from,
-          email_subject: this.settings.email_subject,
-          email_message: this.settings.email_message
+        email: this.settings.email,
+        nostr: this.settings.nostr,
+        email_message: this.settings.email_message,
+        launch_page: this.settings.launch_page
         }
-      }
       if (
         settings.denomination &&
         settings.send_wallet_id &&
@@ -161,33 +175,24 @@ window.app = Vue.createApp({
         });
       }
     },
-    async getOrder(orderId) {
-      try {
-        const response = await LNbits.api.request(
-          'GET',
-          `/sellcoins/api/v1/order/${orderId}`,
-          this.g.user.wallets[0].inkey
-        )
-        this.currentOrder = response.data
-      } catch (err) {
-        LNbits.utils.notifyApiError(err)
-      }
-    },
     async getOrders() {
       try {
         const response = await LNbits.api.request(
           'GET',
-          '/sellcoins/api/v1/orders',
-          this.g.user.wallets[0].inkey
+          '/sellcoins/api/v1/orders/' + this.settings.id,
+          this.g.user.wallets[0].adminkey
         )
         this.orders = response.data
       } catch (err) {
-        LNbits.utils.notifyApiError(err)
+        console.log(err)
       }
     }
   },
   async created() {
     await this.getSettings()
+    if (this.settings.id){
+      await this.getOrders()
+    }
     LNbits.api
       .request('GET', '/api/v1/currencies')
       .then(response => {

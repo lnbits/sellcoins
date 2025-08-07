@@ -15,13 +15,9 @@ async def m001_initial(db):
             haircut INTEGER,
             auto_convert BOOLEAN,
             email BOOLEAN,
-            email_server TEXT,
-            email_port INTEGER,
-            email_username TEXT,
-            email_password TEXT,
-            email_from TEXT,
-            email_subject TEXT,
-            email_message TEXT
+            nostr BOOLEAN,
+            launch_page BOOLEAN,
+            message TEXT
         );
     """
     )
@@ -54,7 +50,9 @@ async def m003_initial(db):
         CREATE TABLE sellcoins.orders (
             id TEXT PRIMARY KEY NOT NULL,
             product_id TEXT NOT NULL,
+            settings_id TEXT NOT NULL,
             email_to TEXT,
+            nostr_key TEXT,
             status TEXT NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT {db.timestamp_now}
         );

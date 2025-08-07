@@ -13,13 +13,9 @@ class Settings(BaseModel):
     haircut: Optional[int] = ""
     auto_convert: Optional[bool]
     email: Optional[bool]
-    email_server: Optional[str] = ""
-    email_port: Optional[int]
-    email_username: Optional[str] = ""
-    email_password: Optional[str] = ""
-    email_from: Optional[str] = ""
-    email_subject: Optional[str] = ""
-    email_message: Optional[str] = ""
+    nostr: Optional[bool]
+    launch_page: Optional[bool]
+    message: Optional[str] = ""
 
 class Product(BaseModel):
     id: Optional[str] = ""
@@ -32,6 +28,12 @@ class Product(BaseModel):
 class Order(BaseModel):
     id: Optional[str] = ""
     product_id: Optional[str] = ""
-    email_to: Optional[str] = "ben@lnbits.com"
+    settings_id: Optional[str] = ""
+    email_to: Optional[str] = ""
+    nostr_key: Optional[str] = ""
     status: Optional[str] = ""
     created_at: datetime = datetime.now(timezone.utc)
+
+class CreateOrder(BaseModel):
+    payment_request: str
+    checking_id: str

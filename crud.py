@@ -14,12 +14,14 @@ async def create_settings(data: Settings) -> Settings:
     await db.insert("sellcoins.settings", data)
     return Settings(**data.dict())
 
+
 async def get_settings(user_id: str) -> Optional[Settings]:
     return await db.fetchone(
         "SELECT * FROM sellcoins.settings WHERE id = :id",
         {"id": user_id},
         Settings,
     )
+
 
 async def update_settings(data: Settings) -> Settings:
     await db.update("sellcoins.settings", data)
@@ -42,19 +44,16 @@ async def get_order(checking_id: str) -> Optional[Order]:
         Order,
     )
 
-
 async def update_order(data: Order) -> Order:
     await db.update("sellcoins.orders", data)
     return Order(**data.dict())
 
 
-async def get_orders(wallet_ids: Union[str, List[str]]) -> List[Order]:
-    if isinstance(wallet_ids, str):
-        wallet_ids = [wallet_ids]
-    q = ",".join([f"'{w}'" for w in wallet_ids])
+async def get_orders(settings_id: str) -> Optional[Order]:
     return await db.fetchall(
-        f"SELECT * FROM sellcoins.orders WHERE wallet IN ({q}) ORDER BY id",
-        model=Order,
+        "SELECT * FROM sellcoins.orders WHERE settings_id = :settings_id",
+        {"settings_id": settings_id},
+        Order,
     )
 
 
@@ -74,12 +73,14 @@ async def get_product(product_id: str) -> Optional[Product]:
         Product,
     )
 
+
 async def get_products(settings_id: str) -> List[Product]:
     return await db.fetchall(
         "SELECT * FROM sellcoins.products WHERE settings_id = :settings_id",
         {"settings_id": settings_id},
         Product,
     )
+
 
 async def delete_product(product_id: str) -> None:
     await db.execute(

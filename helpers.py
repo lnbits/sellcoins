@@ -1,9 +1,8 @@
 import httpx
-from lnbits.core.views.api import api_lnurlscan
-
+from lnurl import handle as lnurl_handle
 
 async def get_pr(ln_address, amount):
-    data = await api_lnurlscan(ln_address)
+    data = await lnurl_handle(ln_address, user_agent="LNbits Sellcoins", timeout=5)
     if data.get("status") == "ERROR":
         return
     try:
