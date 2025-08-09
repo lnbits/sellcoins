@@ -76,7 +76,7 @@ async def get_order_page(req: Request, order_id: str):
             status_code=HTTPStatus.NOT_FOUND, detail="Order does not exist."
         )
     encoded_lnurl = url_encode(
-        f"http://{settings.host}:{settings.port}/sellcoins/api/v1/lnurl/{order.id}"
+        str(req.url_for("sellcoins.api_lnurl_withdraw", order_id=order_id))
     )
     return sellcoins_renderer().TemplateResponse(
         "sellcoins/order.html",
