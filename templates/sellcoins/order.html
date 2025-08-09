@@ -12,7 +12,6 @@
         </div>
         <div class="row q-mt-lg q-gutter-sm">
           <q-btn outline color="grey" @click="copyText(paymentRequest)">Copy Payment Request</q-btn>
-          <q-btn outline color="grey" :href="paymentRequest" target="_blank"  class="float-right">Open Link</q-btn>
         </div>
       </q-card-section>
       <q-card-section v-else-if="orderStatus === 'paid'" class="q-pa-none">
@@ -36,26 +35,39 @@
     </q-card>
   </div>
   <div class="col-12 col-sm-6 col-md-5 col-lg-4 q-gutter-y-md">
-    <q-card>
+    <q-card style="box-shadow: none !important">
       <q-card-section v-if="orderStatus === 'unpaid'">
-        <h4 class="text-subtitle1 q-mb-sm q-mt-none">Order Not Paid</h4>
-        <p class="text-subtitle2 q-mb-sm q-mt-none">Please scan the QR code to pay.</p>
+        <h4 class="q-mb-sm q-mt-none">Order Not Paid</h4>
+        <h5 class="q-mb-sm q-mt-none">Please scan the QR code to pay.</h5>
+        <img src="/sellcoins/static/image/atm_in.png" class="q-mb-sm q-mt-none" alt="ATM in">
       </q-card-section>
       <q-card-section v-else-if="orderStatus === 'paid'">
-        <h4 class="text-subtitle1 q-mb-sm q-mt-none">Thank you for your order!</h4>
-        <h6 class="text-subtitle1 q-mb-sm q-mt-none">Scan the Qr code to withdraw</h6>
+        <h4 class="q-mb-sm q-mt-none">Thank you for your order!</h4>
+        <h5 class="q-mb-sm q-mt-none">Scan the Qr code to withdraw</h5>
+        <img src="/sellcoins/static/image/atm_out.png" class="q-mb-sm q-mt-none" alt="ATM out">
       </q-card-section>
       <q-card-section v-else-if="orderStatus === 'claimed'">
-        <h4 class="text-subtitle1 q-mb-sm q-mt-none">Order Claimed</h4>
-        <p class="text-subtitle2 q-mb-sm q-mt-none">Your order sats have been transferred.</p>
+        <h4 class="q-mb-sm q-mt-none">Order Claimed</h4>
+        <h5 class="q-mb-sm q-mt-none">Your order sats have been transferred.</h5>
+        <img src="/sellcoins/static/image/atm_claimed.png" class="q-mb-sm q-mt-none" alt="ATM claimed">
       </q-card-section>
       <q-card-section v-else>
-        <h4 class="text-subtitle1 q-mb-sm q-mt-none">Order Error</h4>
-        <p class="text-subtitle2 q-mb-sm q-mt-none">Order status unknown.</p>
+        <h4 class="q-mb-sm q-mt-none">Order Error</h4>
+        <h5 class="q-mb-sm q-mt-none">Order status unknown.</h5>
+        <img src="/sellcoins/static/image/atm_error.png" class="q-mb-sm q-mt-none" alt="ATM unknown">
     </q-card>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+{% endblock %}
+{% block styles %}
+<style>
+  .q-header,
+  .q-footer {
+    display: none;
+  }
+</style>
+{% endblock %}
+{% block scripts %}
 <script>
   window.app = Vue.createApp({
     el: '#vue',
@@ -70,9 +82,6 @@
       }
     },
     methods: {
-      copyText: function (text) {
-        navigator.clipboard.writeText(text)
-      },
       subscribeToPaymentWS(id, message) {
         console.log(`Subscribing to payment updates for ID: ${id}`, message);
         try {

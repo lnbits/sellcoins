@@ -37,9 +37,10 @@ async def api_lnurl_withdraw(
     exchange_rate, _ = await get_fiat_rate_and_price_satoshis(
         sellcoins_settings.denomination
     )
-    sats_amount = int(exchange_rate * product.amount - (
-        exchange_rate * product.amount / 100 * sellcoins_settings.haircut
-    ))
+    sats_amount = int(
+        exchange_rate * product.amount
+        - (exchange_rate * product.amount / 100 * sellcoins_settings.haircut)
+    )
     return {
         "tag": "withdrawRequest",
         "callback": str(

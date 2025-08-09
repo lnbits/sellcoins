@@ -62,3 +62,6 @@ async def m003_initial(db):
 async def m004_add_order_payment_details(db):
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN payment_request TEXT")
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN payment_hash TEXT")
+
+async def m005_add_settings_testing_mode(db):
+    await db.execute("ALTER TABLE sellcoins.settings ADD COLUMN live_mode BOOLEAN")

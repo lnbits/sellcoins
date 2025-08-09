@@ -15,6 +15,7 @@ class Settings(BaseModel):
     email: Optional[bool]
     nostr: Optional[bool]
     launch_page: Optional[bool]
+    live_mode: Optional[bool]
     message: Optional[str] = ""
 
 class Product(BaseModel):

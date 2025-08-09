@@ -90,10 +90,10 @@ async def api_create_order(product_id: str) -> CreateOrder:
     order = await create_order(orderData)
     try:
         invoice_data = CreateInvoice(
-            unit=settings.denomination, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             out=False,
-            fiat_provider="stripe", ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             amount=amount,
+            fiat_provider="stripe" if settings.live_mode else None,
+            unit=settings.denomination if settings.live_mode else "sat",
             memo=f"{settings.title}, Order ID:{order.id}",
             extra={
                 "tag": "SellCoins",
@@ -103,17 +103,17 @@ async def api_create_order(product_id: str) -> CreateOrder:
                 "product_id": product.id,
             },
         )
-        payment = await create_payment_request(
-            settings.receive_wallet_id, invoice_data
-        )
-        payment_request=payment.extra["fiat_payment_request"]
 
+        payment = await create_payment_request(settings.receive_wallet_id, invoice_data)
+        if settings.live_mode:
+            payment_request = payment.extra["fiat_payment_request"]
+        else:
+            payment_request = payment.bolt11
         order.payment_request = payment_request
         order.payment_hash = payment.payment_hash
         await update_order(order)
         createOrder = CreateOrder(
-            # payment_request=payment.bolt11,
-            payment_request=payment_request, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
+            payment_request=payment_request,
             order_id=order.id or "",
             payment_hash=payment.payment_hash,
         )
