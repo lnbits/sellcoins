@@ -35,6 +35,7 @@ class Order(BaseModel):
     status: Optional[str] = ""
     payment_request: Optional[str] = ""
     payment_hash: Optional[str] = ""
+    sats_amount: Optional[int] = 0
     created_at: datetime = datetime.now(timezone.utc)
 
 class CreateOrder(BaseModel):

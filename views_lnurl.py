@@ -41,6 +41,8 @@ async def api_lnurl_withdraw(
         exchange_rate * product.amount
         - (exchange_rate * product.amount / 100 * sellcoins_settings.haircut)
     )
+    order.sats_amount = sats_amount
+    await update_order(Order(**order.dict()))
     return {
         "tag": "withdrawRequest",
         "callback": str(
@@ -94,7 +96,7 @@ async def api_lnurl_withdraw_cb(
         await pay_invoice(
             wallet_id=sellcoins_settings.send_wallet_id,
             payment_request=pr,
-            max_sat=product.amount * 1000,
+            max_sat=order.sats_amount * 1000,
             extra={"tag": f"SellCoins - {order_id}"},
         )
         await websocket_updater(order_id, order.id)
