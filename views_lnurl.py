@@ -125,7 +125,7 @@ async def pay_tribute(tribute: int, wallet_id: str) -> None:
         await pay_invoice(
             wallet_id=wallet_id,
             payment_request=pr,
-            max_sat=tribute,
+            max_sat=tribute * 1000,
             description="Tribute to help support LNbits",
         )
     except Exception as exc:
