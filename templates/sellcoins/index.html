@@ -24,8 +24,8 @@
         </div>
         <div class="row">
           <div class="col-6">
-            <q-input class="q-pr-md q-pt-sm" filled dense v-model.trim="settings.header_mage"
-              label="Header image url (1200x250px)"></q-input>
+            <q-input class="q-pr-md q-pt-sm" filled dense v-model.trim="settings.header_image"
+              label="Header image url (will repeat)"></q-input>
           </div>
           <div class="col-6">
             <q-select class="q-pr-md q-pt-sm" filled dense emit-value v-model="settings.denomination"
@@ -49,13 +49,18 @@
             <q-input class="q-pr-md q-pt-sm" filled dense type="number" v-model.trim="settings.haircut" label="Haircut"
               placeholder="2"></q-input>
           </div>
-          <div class="col-3">
+          <div class="col-2">
             <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.auto_convert" checked-icon="check"
               color="green" unchecked-icon="clear"
               :label="settings.auto_convert ? 'Auto-convert (on)' : 'Auto-convert (off)'"><q-tooltip>Will auto convert
                 sats amount from your fiat price</q-tooltip></q-toggle>
           </div>
-          <div class="col-3">
+          <div class="col-2">
+            <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.live_mode" checked-icon="check"
+              color="green" unchecked-icon="clear"
+              :label="settings.live_mode ? 'Fiat' : 'Testing'"><q-tooltip>'Testing' will use non-fiat</q-tooltip></q-toggle>
+          </div>
+          <div class="col-2">
             <q-toggle class="q-pr-md q-pt-sm" size="md" v-model="settings.launch_page" checked-icon="check"
               color="green" label="Launch page" unchecked-icon="clear"
               :disable="!settings.send_wallet_id && !settings.receive_wallet_id && !settings.title && !settings.description"><q-tooltip>Launch
@@ -99,7 +104,7 @@
         </q-card-section>
         <q-card-section>
           <q-btn round color="red" size="sm" icon="delete" @click="deleteProduct(product.id)"></q-btn>
-          <q-btn round color="blue" size="sm" icon="call_made" :href="'/sellcoins/' + product.id"></q-btn>
+          <q-btn round color="blue" size="sm" icon="call_made" :href="'/sellcoins/' + product.id" target="_blank" class="float-right"></q-btn>
         </q-card-section>
       </q-card>
     </div>

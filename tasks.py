@@ -1,15 +1,15 @@
 import asyncio
 
+from loguru import logger
+
 from lnbits.core.models import Payment
 from lnbits.core.services import websocket_updater
 from lnbits.tasks import register_invoice_listener
-from lnbits.core.services.notifications import send_notification
+# from lnbits.core.services.notifications import send_notification
 from lnbits.core.services import pay_invoice
 from .crud import get_order, update_order, get_product, get_settings
 from .models import Order
 from .helpers import get_pr
-from lnbits.settings import settings
-from lnurl import encode as url_encode
 
 
 async def wait_for_paid_invoices():
@@ -39,7 +39,7 @@ async def on_invoice_paid(payment: Payment) -> None:
     await update_order(Order(**order.dict()))
 
     # Use WS to update the frontend
-    await websocket_updater(order_id, order.id)
+    # await websocket_updater(order_id, order.id) # this is not needed, we wait on invoice
 
     # Pay the LNbits Inc tribute, if you remove this you remove part of your soul
     tribute = product.amount * 0.5 // 100  # 0.5% tribute
@@ -71,6 +71,5 @@ async def pay_tribute(haircut_amount: int, wallet_id: str) -> None:
             max_sat=tribute,
             description="Tribute to help support LNbits",
         )
-    except Exception:
-        pass
-    return
+    except Exception as exc:
+        logger.warning(exc)

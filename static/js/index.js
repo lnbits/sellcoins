@@ -20,13 +20,14 @@ window.app = Vue.createApp({
         receive_wallet_id: '',
         title: 'Buy coins',
         description: 'Use your card to pay for coins.',
-        header_mage: '',
+        header_image: '/sellcoins/static/image/bitcoins.png',
         haircut: 0,
-        auto_convert: false,
+        auto_convert: true,
         email: false,
         nostr: false,
         email_message: 'Your coins are ready to be withdrawn. Scan or click the link below to withdraw your coins.',
-        launch_page: false
+        launch_page: true,
+        live_mode: false
       },
       settingsExist: false,
       orders: [],
@@ -86,13 +87,14 @@ window.app = Vue.createApp({
         receive_wallet_id: this.settingsExist ? this.settings.receive_wallet_id : this.settings.receive_wallet_id.value,
         title: this.settings.title,
         description: this.settings.description,
-        header_mage: this.settings.header_mage,
+        header_image: this.settings.header_image,
         haircut: this.settings.haircut,
         auto_convert: this.settings.auto_convert || false,
         email: this.settings.email,
         nostr: this.settings.nostr,
         email_message: this.settings.email_message,
-        launch_page: this.settings.launch_page
+        launch_page: this.settings.launch_page,
+        live_mode: this.settings.live_mode || false
         }
       if (
         settings.denomination &&

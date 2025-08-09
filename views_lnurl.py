@@ -4,6 +4,7 @@ from typing import Optional
 import shortuuid
 from fastapi import APIRouter, Request
 from lnbits.core.services import pay_invoice
+from lnbits.core.services.websockets import websocket_updater
 
 from .crud import get_order, get_product, get_settings, update_order
 from .models import Order
@@ -36,9 +37,10 @@ async def api_lnurl_withdraw(
     exchange_rate, _ = await get_fiat_rate_and_price_satoshis(
         sellcoins_settings.denomination
     )
-    sats_amount = int(exchange_rate * product.amount - (
-        exchange_rate * product.amount / 100 * sellcoins_settings.haircut
-    ))
+    sats_amount = int(
+        exchange_rate * product.amount
+        - (exchange_rate * product.amount / 100 * sellcoins_settings.haircut)
+    )
     return {
         "tag": "withdrawRequest",
         "callback": str(
@@ -67,7 +69,7 @@ async def api_lnurl_withdraw_cb(
     order = await get_order(order_id)
     if not order:
         return {"status": "ERROR", "reason": "No sellcoins found"}
-    product = await get_product(order_id)
+    product = await get_product(order.product_id)
     if not product:
         return {
             "status": "ERROR",
@@ -95,6 +97,7 @@ async def api_lnurl_withdraw_cb(
             max_sat=product.amount * 1000,
             extra={"tag": f"SellCoins - {order_id}"},
         )
+        await websocket_updater(order_id, order.id)
         return {"status": "OK"}
     except Exception as e:
         # If payment fails, revert the order status

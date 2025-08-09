@@ -14,6 +14,7 @@ from .crud import (
     get_product,
     get_products,
     get_settings,
+    update_order,
     update_settings,
     create_settings,
 )
@@ -89,10 +90,10 @@ async def api_create_order(product_id: str) -> CreateOrder:
     order = await create_order(orderData)
     try:
         invoice_data = CreateInvoice(
-            unit=settings.denomination, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             out=False,
-            fiat_provider="stripe", ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
             amount=amount,
+            fiat_provider="stripe" if settings.live_mode else None,
+            unit=settings.denomination if settings.live_mode else "sat",
             memo=f"{settings.title}, Order ID:{order.id}",
             extra={
                 "tag": "SellCoins",
@@ -102,17 +103,24 @@ async def api_create_order(product_id: str) -> CreateOrder:
                 "product_id": product.id,
             },
         )
-        payment = await create_payment_request(
-            settings.receive_wallet_id, invoice_data
-        )
+
+        payment = await create_payment_request(settings.receive_wallet_id, invoice_data)
+        if settings.live_mode:
+            payment_request = payment.extra["fiat_payment_request"]
+        else:
+            payment_request = payment.bolt11
+        order.payment_request = payment_request
+        order.payment_hash = payment.payment_hash
+        await update_order(order)
         createOrder = CreateOrder(
-            # payment_request=payment.bolt11,
-            payment_request=payment.fiat_payment_request, ### UNCOMMENT FOR TESTING TO PAY REGULAR INVOICE
-            checking_id=order.id,
+            payment_request=payment_request,
+            order_id=order.id or "",
+            payment_hash=payment.payment_hash,
         )
         return createOrder
 
     except Exception as exc:
+        logger.warning(exc)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         ) from exc

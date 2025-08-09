@@ -80,7 +80,14 @@ async def get_order_page(req: Request, order_id: str):
     )
     return sellcoins_renderer().TemplateResponse(
         "sellcoins/order.html",
-        {"request": req, "lnurl": encoded_lnurl},
+        {
+            "request": req,
+            "lnurl": encoded_lnurl,
+            "order_id": order.id,
+            "order_status": order.status,
+            "payment_request": order.payment_request,
+            "payment_hash": order.payment_hash,
+        },
     )
 
 

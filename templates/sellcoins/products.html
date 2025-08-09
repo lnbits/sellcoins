@@ -1,8 +1,7 @@
 {% extends "public.html" %} {% block page %}
 
 <div class="row q-col-gutter-md justify-center">
-  <div class="q-pa-xl text-white"
-    :style="`background-image: url('${header_image}'); background-size: cover; background-position: center;`">
+  <div class="q-pa-xl text-white">
     <center>
       <span class="text-h2" v-text="title"></span>
       <br />
@@ -11,7 +10,7 @@
   </div>
 </div>
 <div class="row q-col-gutter-md justify-center">
-  <div class="q-gutter-md row wrap justify-start">
+  <div class="q-gutter-md row wrap justify-start q-mt-lg">
 
     <q-card v-for="product in products" :key="product.id" class="q-ma-sm" style="width: 200px">
       <q-card-section>
@@ -24,28 +23,30 @@
         <div class="text-subtitle2 text-grey-7"><span v-text="product.description"></span></div>
       </q-card-section>
       <q-card-section>
-        <q-btn color="primary" size="md" icon="shopping_cart" label="Buy" @click="createOrder(product.id)"></q-btn>
+        <q-btn color="primary" size="md" class="full-width" icon="shopping_cart" label="Buy"
+          @click="createOrder(product.id)"></q-btn>
       </q-card-section>
     </q-card>
 
   </div>
 </div>
 
-<q-dialog v-model="form.show" position="top">
-  <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card"> </q-card>
-</q-dialog>
+{% endblock %}
+{% block styles %}
+<style>
+  .q-page {
+    background-repeat: repeat-x;
+    background-image: url('{{ header_image }}') !important;
+    background-size: auto 180px;
+  }
 
-<q-dialog v-model="qrcode.show" position="top">
-  <q-card v-if="qrcode.payment_request" class="q-pa-lg q-pt-xl lnbits__dialog-card">
-    <lnbits-qrcode :value="qrcode.payment_request" class="rounded-borders"></lnbits-qrcode>
-    <div class="row q-mt-lg">
-      <q-btn outline color="grey" @click="copyText(qrcode.payment_request)">Copy invoice</q-btn>
-      <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
-    </div>
-  </q-card>
-</q-dialog>
-
-{% endblock %} {% block scripts %}
+  .q-header,
+  .q-footer {
+    display: none;
+  }
+</style>
+{% endblock %}
+{% block scripts %}
 <script>
   window.app = Vue.createApp({
     el: '#vue',
@@ -60,31 +61,19 @@
         products: '{{ products }}'.length > 0 ? JSON.parse('{{ products | tojson }}') : [],
         denomination: '{{ denomination }}',
         receive_denomination: '{{LNBITS_DENOMINATION}}',
-        form: {
-          show: false
-        },
-        qrcode: {
-          show: false,
-          payment_request: '',
-          checking_id: ''
-        }
+        header_image: '{{ header_image }}'
       }
     },
     methods: {
-      copyText: function (text) {
-        navigator.clipboard.writeText(text)
-      },
       async createOrder(productId) {
         try {
           const response = await LNbits.api.request(
             'GET',
             '/sellcoins/api/v1/order/' + productId
           )
-          this.qrcode.payment_request = response.data.extra.fiat_payment_request
-          this.qrcode.checking_id = response.data.checking_id
-          eventReactionWebocket(this.qrcode.checking_id)
-          this.subscribeToPaymentWS(this.qrcode.checking_id)
+          window.location.href = `/sellcoins/order/${response.data.order_id}`
         } catch (err) {
+          console.log(err)
           this.$q.notify({
             type: 'warning',
             message: 'Failed to create order'
@@ -93,29 +82,6 @@
       },
       convert_amount(amount) {
         return parseInt((this.exchange_rate * amount - (this.exchange_rate * amount / 100 * parseInt(this.haircut))))
-      },
-      subscribeToPaymentWS(checkingId) {
-        try {
-          const url = new URL(window.location)
-          url.protocol = url.protocol === 'https:' ? 'wss' : 'ws'
-          url.pathname = `/api/v1/ws/${checkingId}`
-          const ws = new WebSocket(url)
-          ws.onmessage = async ({ data }) => {
-            const order_id = JSON.parse(data)
-            Quasar.Notify.create({
-              type: 'positive',
-              message: 'Invoice Paid! Redirecting in 3 seconds...'
-            })
-            this.qrcode.show = false
-            ws.close()
-            setTimeout(() => {
-              window.location.href = `/sellcoins/order/${order_id}`
-            }, 3000)
-          }
-        } catch (err) {
-          console.warn(err)
-          LNbits.utils.notifyApiError(err)
-        }
       },
     },
     created: async function () {

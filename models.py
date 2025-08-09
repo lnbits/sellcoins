@@ -15,6 +15,7 @@ class Settings(BaseModel):
     email: Optional[bool]
     nostr: Optional[bool]
     launch_page: Optional[bool]
+    live_mode: Optional[bool]
     message: Optional[str] = ""
 
 class Product(BaseModel):
@@ -32,8 +33,11 @@ class Order(BaseModel):
     email_to: Optional[str] = ""
     nostr_key: Optional[str] = ""
     status: Optional[str] = ""
+    payment_request: Optional[str] = ""
+    payment_hash: Optional[str] = ""
     created_at: datetime = datetime.now(timezone.utc)
 
 class CreateOrder(BaseModel):
     payment_request: str
-    checking_id: str
+    order_id: str
+    payment_hash: str
