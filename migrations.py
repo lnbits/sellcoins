@@ -66,5 +66,5 @@ async def m004_add_order_payment_details(db):
 async def m005_add_settings_testing_mode(db):
     await db.execute("ALTER TABLE sellcoins.settings ADD COLUMN live_mode BOOLEAN")
 
-async def m005_add_order_sats_amount(db):
+async def m006_add_order_sats_amount(db):
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN sats_amount INTEGER")
