@@ -9,7 +9,6 @@ from lnbits.tasks import register_invoice_listener
 from lnbits.core.services import pay_invoice
 from .crud import get_order, update_order, get_product, get_settings
 from .models import Order
-from .helpers import get_pr
 
 
 async def wait_for_paid_invoices():
@@ -33,17 +32,15 @@ async def on_invoice_paid(payment: Payment) -> None:
     assert product, "Product not found"
     sellcoins_settings = await get_settings(product.settings_id)
     assert sellcoins_settings, "Settings not found"
-
+    if order.status == "claimed":
+        logger.warning(f"Order {order.id} already claimed, skipping")
+        return
     # Update the order as paid so if worse comes to worse, we can still see it and settle with the user
     order.status = "paid"
     await update_order(Order(**order.dict()))
 
     # Use WS to update the frontend
     # await websocket_updater(order_id, order.id) # this is not needed, we wait on invoice
-
-    # Pay the LNbits Inc tribute, if you remove this you remove part of your soul
-    tribute = product.amount * 0.5 // 100  # 0.5% tribute
-    await pay_tribute(tribute, sellcoins_settings.send_wallet_id)
 
     # Send the notification
     # encoded_lnurl = url_encode(f"http://{settings.host}:{settings.port}/sellcoins/api/v1/lnurl/{order.id}")
@@ -58,18 +55,3 @@ async def on_invoice_paid(payment: Payment) -> None:
     #    except Exception as e:
     #        assert f"Error sending email: {e}"
 
-# You can remove this, but that would be mean
-async def pay_tribute(haircut_amount: int, wallet_id: str) -> None:
-    try:
-        tribute = int(2 * (haircut_amount / 100))
-        pr = await get_pr("lnbits@nostr.com", tribute)
-        if not pr:
-            return
-        await pay_invoice(
-            wallet_id=wallet_id,
-            payment_request=pr,
-            max_sat=tribute,
-            description="Tribute to help support LNbits",
-        )
-    except Exception as exc:
-        logger.warning(exc)
