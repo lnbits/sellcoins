@@ -96,16 +96,22 @@
       @click="show_product_form = true"></q-btn>
     <br></br>
     <div class="q-gutter-md row wrap justify-start">
-      <q-card v-for="product in products" :key="product.id" class="q-ma-sm" style="width: 200px">
+      <q-card v-for="product in products" :key="product.id" class="q-ma-md" style="width: 200px">
         <q-card-section>
-          <div class="text-h4"><span v-text="settings.denomination + ' ' + product.amount"></span></div>
+          <div class="text-h5"><span v-text="settings.denomination + ' ' + product.amount"></span></div>
           <div class="text-h6"><span v-text="product.title"></span></div>
-          <div class="text-subtitle2 text-grey-7"><span v-text="product.description"></span></div>
-        </q-card-section>
-        <q-card-section>
-          <q-btn round color="red" size="sm" icon="delete" @click="deleteProduct(product.id)"></q-btn>
-          <q-btn round color="blue" size="sm" icon="call_made" :href="'/sellcoins/' + product.id" target="_blank" class="float-right"></q-btn>
-        </q-card-section>
+          <div class="text-caption text-grey-7"><span v-text="product.description"></span></div>
+          <div class="row">
+      <div class="col">
+        <q-btn round color="red" size="sm" icon="delete" @click="deleteProduct(product.id)"></q-btn>
+          
+      </div>
+      <div class="col">
+        <q-btn round color="blue" size="sm" icon="call_made" :href="'/sellcoins/' + product.id" target="_blank" class="float-right"></q-btn>
+        
+      </div>
+    </div>
+          </q-card-section>
       </q-card>
     </div>
 
@@ -157,8 +163,16 @@
         </q-list>
       </q-card-section>
     </q-card>
-  </div>
 
+    <q-card>
+      <q-card-section class="q-pa-none">
+        <q-separator></q-separator>
+        <q-list>
+          {% include "sellcoins/_nostr_chat.html" %}
+        </q-list>
+      </q-card-section>
+    </q-card>
+  </div>
   <!--/////////////////////////////////////////////////-->
   <!--//////////////FORM DIALOG////////////////////////-->
   <!--/////////////////////////////////////////////////-->

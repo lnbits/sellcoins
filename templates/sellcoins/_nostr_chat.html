@@ -1,0 +1,45 @@
+<q-card>
+  <q-card-section>
+    <p>
+      Customer Chat, using Nostr DMs (COMING SOON)
+    </p>
+  </q-card-section>
+  <q-btn-dropdown disable color="primary" label="Customer">
+    <q-tooltip>Coming soon!</q-tooltip>
+      <q-list>
+        <q-item clickable v-close-popup>
+          <q-item-section>
+            <q-item-label>npub...</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup>
+          <q-item-section>
+            <q-item-label>npub...</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup>
+          <q-item-section>
+            <q-item-label>npub...</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
+
+  <div class="q-pa-md row justify-center">
+    <div style="width: 100%; max-width: 400px">
+      <q-chat-message
+        :text="['I didnt receive my coins']"
+        sent
+      ></q-chat-message>
+      <q-chat-message
+        :text="['Which one of your orders, can you please pass me the order ID?']"
+      ></q-chat-message>
+    </div>
+     <q-input disable rounded standout label="message">
+        <template v-slot:after>
+          <q-btn disable round dense flat icon="send" />
+        </template>
+     </q-input>
+     
+  </div>
+</q-card>

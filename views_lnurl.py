@@ -108,13 +108,16 @@ async def api_lnurl_withdraw_cb(
         await update_order(Order(**order.dict()))
         return {"status": "ERROR", "reason": f"Error paying invoice: {e}"}
 
-    # Tribute to the devlopers. You can remove this, but that would break the license for this extension and also be mean
-    try:
-        tribute = order.sats_amount * 0.2 // 100  # 0.2% tribute
-        await pay_tribute(tribute, sellcoins_settings.send_wallet_id)
-    except Exception as e:
-        logger.warning(f"Error paying tribute: {e}")
-
+    # Tribute to the developers.
+    # Removing this will break the license for this extension.
+    # But more importantly it would just be mean, 
+    # these small tributes help keep developement going.
+    if sellcoins.settings.live_mode:
+        try:
+            tribute = order.sats_amount * 0.5 // 100  # 0.5% tribute
+            await pay_tribute(tribute, sellcoins_settings.send_wallet_id)
+        except Exception as e:
+            logger.warning(f"Error paying tribute: {e}")
     return {"status": "OK"}
 
 async def pay_tribute(tribute: int, wallet_id: str) -> None:
