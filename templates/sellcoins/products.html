@@ -81,8 +81,13 @@
         }
       },
       convert_amount(amount) {
-        return parseInt((this.exchange_rate * amount - (this.exchange_rate * amount / 100 * parseInt(this.haircut))))
-      },
+        if (this.receive_denomination === 'sat') {
+          return parseInt((this.exchange_rate * amount - (this.exchange_rate * amount / 100 * parseInt(this.haircut))))
+      }
+      else {
+          return parseFloat((1 * amount)).toFixed(2)
+        }
+      }
     },
     created: async function () {
       console.log(this.products)

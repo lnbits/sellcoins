@@ -11,7 +11,7 @@ from .models import Order
 from lnbits.utils.exchange_rates import get_fiat_rate_and_price_satoshis
 from .helpers import get_pr
 from loguru import logger
-
+from lnbits.settings import settings as lnbits_settings
 sellcoins_lnurl_router = APIRouter()
 
 
@@ -36,13 +36,20 @@ async def api_lnurl_withdraw(
     if not sellcoins_settings:
         return {"status": "ERROR", "reason": "No settings found"}
     k1 = shortuuid.uuid(name=order_id)
-    exchange_rate, _ = await get_fiat_rate_and_price_satoshis(
-        sellcoins_settings.denomination
-    )
-    sats_amount = int(
-        exchange_rate * product.amount
-        - (exchange_rate * product.amount / 100 * sellcoins_settings.haircut)
-    )
+    if sellcoins_settings.auto_convert:
+        exchange_rate, _ = await get_fiat_rate_and_price_satoshis(
+            sellcoins_settings.denomination
+        )
+        sats_amount = int(
+            exchange_rate * product.amount
+            - (exchange_rate * product.amount / 100 * sellcoins_settings.haircut)
+        )
+    else:
+        # fake wallet hack
+        if lnbits_settings.lnbits_denomination == "sats":
+            sats_amount = product.amount
+        else:
+            sats_amount = product.amount * 100
     order.sats_amount = sats_amount
     await update_order(Order(**order.dict()))
     return {

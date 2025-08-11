@@ -6,6 +6,7 @@ from lnbits.decorators import require_admin_key, require_invoice_key
 from starlette.exceptions import HTTPException
 from lnbits.core.services import create_payment_request
 from lnbits.core.models import CreateInvoice, WalletTypeInfo
+from lnbits.settings import settings as lnbits_settings
 from .crud import (
     create_order,
     create_product,
@@ -83,7 +84,10 @@ async def api_create_order(product_id: str) -> CreateOrder:
     product = await get_product(product_id)
     settings = await get_settings(product.settings_id)
     if product.price:
-        amount = product.price
+        if lnbits_settings.lnbits_denomination == "sats":
+            amount = product.price
+        else:
+            amount = product.price * 100
     else:
         amount = product.amount
     orderData = Order(product_id=product_id, settings_id=settings.id, status="unpaid")
