@@ -22,6 +22,7 @@ async def wait_for_paid_invoices():
 async def on_invoice_paid(payment: Payment) -> None:
     if payment.extra.get("tag") != "SellCoins":
         return
+    logger.debug(payment)
 
     # Toggle through and get all the details we need
     order_id = payment.extra.get("order_id")
