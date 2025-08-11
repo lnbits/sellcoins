@@ -73,6 +73,11 @@ async def api_lnurl_withdraw_cb(
     order = await get_order(order_id)
     if not order:
         return {"status": "ERROR", "reason": "No sellcoins found"}
+
+    # Check the order status
+    if order.status == "claimed":
+        return {"status": "ERROR", "reason": "Order already claimed"}
+
     product = await get_product(order.product_id)
     if not product:
         return {
@@ -90,6 +95,10 @@ async def api_lnurl_withdraw_cb(
     k1_check = shortuuid.uuid(name=order_id)
     if k1_check != k1:
         return {"status": "ERROR", "reason": "Wrong k1 check provided"}
+
+    # Check the order status
+    if order.status == "claimed":
+        return {"status": "ERROR", "reason": "Order already claimed"}
 
     # Set as claimed and try to pay IMPORTANT as this stops race conditions
     order.status = "claimed"
@@ -112,7 +121,7 @@ async def api_lnurl_withdraw_cb(
     # Removing this will break the license for this extension.
     # But more importantly it would just be mean, 
     # these small tributes help keep developement going.
-    if sellcoins.settings.live_mode:
+    if sellcoins_settings.live_mode:
         try:
             tribute = order.sats_amount * 0.5 // 100  # 0.5% tribute
             await pay_tribute(tribute, sellcoins_settings.send_wallet_id)
