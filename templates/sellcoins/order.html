@@ -4,12 +4,12 @@
     <q-card class="q-pa-lg">
       <q-card-section v-if="orderStatus === 'unpaid'" class="q-pa-none">
         <div class="text-center">
-          <a class="text-secondary" v-if="paymentRequest.slice(0, 4) === 'lnbc'" :href="'lightning:' + paymentRequest">
+          <a class="text-secondary" target="_blank" v-if="paymentRequest.slice(0, 4) === 'lnbc'" :href="'lightning:' + paymentRequest">
             <q-responsive :ratio="1" class="q-mx-md">
               <lnbits-qrcode :value="paymentRequest" :options="{width: 800}" class="rounded-borders"></lnbits-qrcode>
             </q-responsive>
           </a>
-          <a class="text-secondary" v-else :href="paymentRequest">
+          <a class="text-secondary" target="_blank" v-else :href="paymentRequest">
             <q-responsive :ratio="1" class="q-mx-md">
               <lnbits-qrcode :value="paymentRequest" :options="{width: 800}" class="rounded-borders"></lnbits-qrcode>
             </q-responsive>
@@ -90,8 +90,8 @@
       }
     },
     methods: {
-      subscribeToPaymentWS(id, message) {
-        console.log(`Subscribing to payment updates for ID: ${id}`, message);
+      subscribeToPaymentWS(id) {
+        console.log(`Subscribing to payment updates for ID: ${id}`);
         try {
           const url = new URL(window.location)
           url.protocol = url.protocol === 'https:' ? 'wss' : 'ws'
@@ -100,8 +100,7 @@
           ws.onmessage = async ({ data }) => {
             Quasar.Notify.create({
               type: 'positive',
-              message: message,
-              caption: 'Redirecting...',
+              message: 'Redirecting...',
             })
             ws.close()
             setTimeout(() => {
@@ -115,12 +114,7 @@
       },
     },
     created() {
-      if (this.orderStatus === 'unpaid') {
-        this.subscribeToPaymentWS(this.paymentHash, 'Payment received')
-      } else if (this.orderStatus === 'paid') {
-        this.subscribeToPaymentWS(this.orderId, 'Order claimed')
-      }
-
+      this.subscribeToPaymentWS(this.orderId)
     }
   })
 </script>

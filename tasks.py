@@ -33,7 +33,8 @@ async def on_invoice_paid(payment: Payment) -> None:
     assert product, "Product not found"
     sellcoins_settings = await get_settings(product.settings_id)
     assert sellcoins_settings, "Settings not found"
-    if order.status == "claimed":
+    if order.status == "claimed" or order.status == "paid":
+        await websocket_updater(order_id, "claimed")
         logger.warning(f"Order {order.id} already claimed, skipping")
         return
     # Update the order as paid so if worse comes to worse, we can still see it and settle with the user
@@ -41,7 +42,7 @@ async def on_invoice_paid(payment: Payment) -> None:
     await update_order(Order(**order.dict()))
 
     # Use WS to update the frontend
-    # await websocket_updater(order_id, order.id) # this is not needed, we wait on invoice
+    await websocket_updater(order_id, "paid")
 
     # Send the notification
     # encoded_lnurl = url_encode(f"http://{settings.host}:{settings.port}/sellcoins/api/v1/lnurl/{order.id}")

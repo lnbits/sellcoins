@@ -107,17 +107,15 @@ async def api_create_order(product_id: str) -> CreateOrder:
         payment = await create_payment_request(settings.receive_wallet_id, invoice_data)
         if settings.live_mode:
             payment_request = payment.extra["fiat_payment_request"]
-            checking_id = payment.extra["fiat_checking_id"]
         else:
             payment_request = payment.bolt11
-            checking_id = payment.payment_hash
         order.payment_request = payment_request
-        order.payment_hash = checking_id
+        order.payment_hash = payment.checking_id
         await update_order(order)
         createOrder = CreateOrder(
             payment_request=payment_request,
             order_id=order.id or "",
-            payment_hash=checking_id,
+            payment_hash=payment.checking_id,
         )
         return createOrder
 
