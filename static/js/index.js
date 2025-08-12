@@ -117,8 +117,7 @@ window.app = Vue.createApp({
             type: 'positive'
           });
           if (response.data) {
-            console.log(response.data);
-            this.settings.data = response.data;
+            await this.getSettings()
           }
         } catch (err) {
           this.$q.notify({
