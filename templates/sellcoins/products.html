@@ -81,7 +81,7 @@
         }
       },
       convert_amount(amount) {
-        if (this.receive_denomination === 'sat') {
+        if (this.receive_denomination === 'sats') {
           return parseInt((this.exchange_rate * amount - (this.exchange_rate * amount / 100 * parseInt(this.haircut))))
       }
       else {
