@@ -3,8 +3,7 @@
     {
       "id": "sellcoins",
       "organisation": "lnbits",
-      "repository": "sellcoins",
-      "icon": "https://raw.githubusercontent.com/lnbits/sellcoins/refs/heads/master/static/image/sellcoins.png"
+      "repository": "sellcoins"
     }
   ]
 }

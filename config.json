@@ -5,7 +5,6 @@
   "repo": "https://github.com/lnbits/sellcoins",
   "short_description": "Sell coins for fiat",
   "tile": "/sellcoins/static/image/sellcoins.png",
-  "icon": "https://raw.githubusercontent.com/lnbits/sellcoins/refs/heads/master/static/image/sellcoins.png",
   "min_lnbits_version": "1.0.0",
   "contributors": [
     {
