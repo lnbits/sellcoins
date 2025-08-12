@@ -1,5 +1,8 @@
 {
-  "name": "Sell Coins",
+  "id": "sellcoins",
+  "version": "0.0.1",
+  "name": "SellCoins",
+  "repo": "https://github.com/lnbits/sellcoins",
   "short_description": "Sell coins for fiat",
   "tile": "/sellcoins/static/image/sellcoins.png",
   "min_lnbits_version": "1.0.0",
@@ -8,6 +11,11 @@
       "name": "Ben Arc",
       "uri": "https://github.com/arcbtc",
       "role": "Lead Dev"
+    },
+    {
+      "name": "motorina0",
+      "uri": "https://github.com/motorina0",
+      "role": "Contributor"
     },
     {
       "name": "Alan Bits",
