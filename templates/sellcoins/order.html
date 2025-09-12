@@ -25,8 +25,11 @@
         <div class="text-center">
           <a class="text-secondary" :href="'lightning:' + lnurl">
             <q-responsive :ratio="1" class="q-mx-md">
-              <lnbits-qrcode :value="lnurl" :options="{width: 800}" class="rounded-borders"></lnbits-qrcode>
-            </q-responsive>
+              <lnbits-qrcode-lnurl
+        :url="lnurl"
+        prefix="lnurlw"
+      ></lnbits-qrcode-lnurl>
+             </q-responsive>
           </a>
         </div>
         <div class="row q-mt-lg q-gutter-sm">
