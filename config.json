@@ -4,6 +4,7 @@
   "name": "SellCoins",
   "repo": "https://github.com/lnbits/sellcoins",
   "short_description": "Sell coins for fiat",
+  "description": "",
   "tile": "/sellcoins/static/image/sellcoins.png",
   "min_lnbits_version": "1.3.0",
   "contributors": [
@@ -30,17 +31,15 @@
   ],
   "images": [
     {
-      "uri": "https://raw.githubusercontent.com/lnbits/sellcoins/main/static/image/1.png",
-      "link": "https://www.youtube.com/embed/SkkIwO_X4i4?si=9JJh1Fc6GfHDZK6b"
-    },
-    {
-      "uri": "https://raw.githubusercontent.com/lnbits/sellcoins/main/static/image/2.png"
-    },
-    {
-      "uri": "https://raw.githubusercontent.com/lnbits/sellcoins/main/static/image/3.png"
+      "uri": "https://raw.githubusercontent.com/lnbits/sellcoins/main/static/image/SellCoins_thumbnail.png",
+      "link": "https://www.youtube.com/watch?v=AItSB_ln89U"
     }
   ],
   "description_md": "https://raw.githubusercontent.com/lnbits/sellcoins/main/description.md",
   "terms_and_conditions_md": "https://raw.githubusercontent.com/lnbits/sellcoins/main/toc.md",
-  "license": "MIT"
+  "license": "MIT",
+  "paid_features": "",
+  "tags": ["Utilities", "Exchange", "Fiat", "Stripe"],
+  "donate": "",
+  "hidden": false
 }
