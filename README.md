@@ -1,5 +1,43 @@
-# Sell Coins - An [LNbits](https://github.com/lnbits/lnbits) Extension
+<a href="https://lnbits.com" target="_blank" rel="noopener noreferrer">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/QE6SIrs.png">
+    <img src="https://i.imgur.com/fyKPgVT.png" alt="LNbits" style="width:280px">
+  </picture>
+</a>
 
-## Sell your coins.
+[![License: MIT](https://img.shields.io/badge/License-MIT-success?logo=open-source-initiative&logoColor=white)](./LICENSE)
+[![Built for LNbits](https://img.shields.io/badge/Built%20for-LNbits-4D4DFF?logo=lightning&logoColor=white)](https://github.com/lnbits/lnbits)
 
-Stripe payments nee dto be enabled in LNbits.
+# SellCoins - [LNbits](https://lnbits.com) extension
+
+Sell bitcoin for fiat using Stripe. Let customers pay with credit card and receive sats from your LNbits wallet via LNURL-withdraw.
+
+## Requirements
+
+Stripe payments must be enabled in your LNbits instance (Admin feature).
+
+## How it works
+
+Customers pay with their credit card through Stripe. Once the payment is confirmed, they receive an LNURL-withdraw code to claim the equivalent amount in sats from your wallet.
+
+## Features
+
+- Stripe fiat payment integration
+- Configurable exchange rates and fees
+- LNURL-withdraw for bitcoin delivery
+- Transaction history
+
+## Usage
+
+1. Enable the extension in LNbits
+2. Configure your Stripe API keys in Server Settings
+3. Set your rates and fees
+4. Share the purchase page
+5. Customers pay with card and withdraw sats
+
+## Powered by LNbits
+
+[LNbits](https://lnbits.com) is a free and open-source lightning accounts system.
+
+[![Visit LNbits Shop](https://img.shields.io/badge/Visit-LNbits%20Shop-7C3AED?logo=shopping-cart&logoColor=white&labelColor=5B21B6)](https://shop.lnbits.com/)
+[![Try myLNbits SaaS](https://img.shields.io/badge/Try-myLNbits%20SaaS-2563EB?logo=lightning&logoColor=white&labelColor=1E40AF)](https://my.lnbits.com/login)

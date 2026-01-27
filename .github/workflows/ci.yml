@@ -26,4 +26,4 @@ jobs:
           emoji: false
           click-to-expand: true
           custom-pytest: uv run pytest
-          report-title: 'test'
+          report-title: "test"
