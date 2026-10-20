@@ -46,7 +46,7 @@ async def m003_initial(db):
     Initial templates table.
     """
     await db.execute(
-       f"""
+        f"""
         CREATE TABLE sellcoins.orders (
             id TEXT PRIMARY KEY NOT NULL,
             product_id TEXT NOT NULL,
@@ -59,12 +59,15 @@ async def m003_initial(db):
     """
     )
 
+
 async def m004_add_order_payment_details(db):
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN payment_request TEXT")
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN payment_hash TEXT")
 
+
 async def m005_add_settings_testing_mode(db):
     await db.execute("ALTER TABLE sellcoins.settings ADD COLUMN live_mode BOOLEAN")
+
 
 async def m006_add_order_sats_amount(db):
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN sats_amount INTEGER")

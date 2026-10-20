@@ -1,15 +1,17 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends
-from lnbits.core.models import WalletTypeInfo
-from lnbits.decorators import require_admin_key, require_invoice_key
-from starlette.exceptions import HTTPException
-from lnbits.core.services import create_payment_request
 from lnbits.core.models import CreateInvoice, WalletTypeInfo
+from lnbits.core.services import create_payment_request
+from lnbits.decorators import require_admin_key, require_invoice_key
 from lnbits.settings import settings as lnbits_settings
+from loguru import logger
+from starlette.exceptions import HTTPException
+
 from .crud import (
     create_order,
     create_product,
+    create_settings,
     delete_product,
     get_orders,
     get_product,
@@ -17,10 +19,8 @@ from .crud import (
     get_settings,
     update_order,
     update_settings,
-    create_settings,
 )
-from .models import Order, Product, Settings, CreateOrder
-from loguru import logger
+from .models import CreateOrder, Order, Product, Settings
 
 sellcoins_api_router = APIRouter()
 
@@ -82,7 +82,21 @@ async def api_delete_product(
 @sellcoins_api_router.get("/api/v1/order/{product_id}", status_code=HTTPStatus.CREATED)
 async def api_create_order(product_id: str) -> CreateOrder:
     product = await get_product(product_id)
+    if not product:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Product not found."
+        )
     settings = await get_settings(product.settings_id)
+    if not settings:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Settings not found."
+        )
+    if not settings.denomination or not settings.receive_wallet_id:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Payment settings are incomplete.",
+        )
+    amount: int | None
     if product.price:
         if lnbits_settings.lnbits_denomination == "sats":
             amount = product.price
@@ -90,8 +104,13 @@ async def api_create_order(product_id: str) -> CreateOrder:
             amount = product.price * 100
     else:
         amount = product.amount
-    orderData = Order(product_id=product_id, settings_id=settings.id, status="unpaid")
-    order = await create_order(orderData)
+    if amount is None:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Product amount is not configured.",
+        )
+    order_data = Order(product_id=product_id, settings_id=settings.id, status="unpaid")
+    order = await create_order(order_data)
     try:
         invoice_data = CreateInvoice(
             out=False,
@@ -116,12 +135,12 @@ async def api_create_order(product_id: str) -> CreateOrder:
         order.payment_request = payment_request
         order.payment_hash = payment.checking_id
         await update_order(order)
-        createOrder = CreateOrder(
+        create_order_response = CreateOrder(
             payment_request=payment_request,
             order_id=order.id or "",
             payment_hash=payment.checking_id,
         )
-        return createOrder
+        return create_order_response
 
     except Exception as exc:
         logger.warning(exc)

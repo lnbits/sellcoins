@@ -6,10 +6,10 @@ from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 from lnbits.helpers import template_renderer
 from lnbits.settings import settings
-from .crud import get_order, get_product, get_products, get_settings
-from loguru import logger
 from lnbits.utils.exchange_rates import get_fiat_rate_and_price_satoshis
 from lnurl import encode as url_encode
+
+from .crud import get_order, get_product, get_products, get_settings
 
 sellcoins_generic_router = APIRouter()
 
@@ -24,7 +24,7 @@ def sellcoins_renderer():
 @sellcoins_generic_router.get("/", response_class=HTMLResponse)
 async def index(req: Request, user: User = Depends(check_user_exists)):
     return sellcoins_renderer().TemplateResponse(
-        "sellcoins/index.html", {"request": req, "user": user.json()}
+        "sellcoins/index.html", {"request": req, "user": user.model_dump_json()}
     )
 
 
@@ -48,9 +48,13 @@ async def get_products_page(req: Request, product_id: str):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="Failed to launch product page."
         )
-    products_dicts = [p.dict(exclude={"settings_id"}) for p in products]
-    exchange_rate = 1
+    products_dicts = [p.model_dump(exclude={"settings_id"}) for p in products]
+    exchange_rate = 1.0
     if settings.auto_convert:
+        if not settings.denomination:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST, detail="Currency is not configured."
+            )
         exchange_rate, _ = await get_fiat_rate_and_price_satoshis(settings.denomination)
     return sellcoins_renderer().TemplateResponse(
         "sellcoins/products.html",
@@ -103,7 +107,7 @@ async def manifest(settings_id: str):
         )
     return {
         "short_name": settings.lnbits_site_title,
-        "name": sellcoins_settings.name + " - " + settings.lnbits_site_title,
+        "name": (sellcoins_settings.title or "") + " - " + settings.lnbits_site_title,
         "icons": [
             {
                 "src": (
@@ -123,9 +127,11 @@ async def manifest(settings_id: str):
         "theme_color": "#1F2234",
         "shortcuts": [
             {
-                "name": sellcoins_settings.name + " - " + settings.lnbits_site_title,
-                "short_name": sellcoins_settings.name,
-                "description": sellcoins_settings.name
+                "name": (sellcoins_settings.title or "")
+                + " - "
+                + settings.lnbits_site_title,
+                "short_name": (sellcoins_settings.title or ""),
+                "description": (sellcoins_settings.title or "")
                 + " - "
                 + settings.lnbits_site_title,
                 "url": "/sellcoins/" + settings_id,

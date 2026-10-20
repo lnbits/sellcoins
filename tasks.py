@@ -1,13 +1,13 @@
 import asyncio
 
-from loguru import logger
-
 from lnbits.core.models import Payment
+
+# from lnbits.core.services.notifications import send_notification
 from lnbits.core.services import websocket_updater
 from lnbits.tasks import register_invoice_listener
-# from lnbits.core.services.notifications import send_notification
-from lnbits.core.services import pay_invoice
-from .crud import get_order, update_order, get_product, get_settings
+from loguru import logger
+
+from .crud import get_order, get_product, get_settings, update_order
 from .models import Order
 
 
@@ -37,18 +37,25 @@ async def on_invoice_paid(payment: Payment) -> None:
         await websocket_updater(order_id, "claimed")
         logger.warning(f"Order {order.id} already claimed, skipping")
         return
-    # Update the order as paid so if worse comes to worse, we can still see it and settle with the user
+    # Mark the order as paid so we can still settle with the user if needed.
     order.status = "paid"
-    await update_order(Order(**order.dict()))
+    await update_order(Order(**order.model_dump()))
 
     # Use WS to update the frontend
     await websocket_updater(order_id, "paid")
 
     # Send the notification
-    # encoded_lnurl = url_encode(f"http://{settings.host}:{settings.port}/sellcoins/api/v1/lnurl/{order.id}")
+    # encoded_lnurl = url_encode(
+    #     f"http://{settings.host}:{settings.port}/sellcoins/api/v1/lnurl/{order.id}"
+    # )
     # if settings.notification:
     #    try:
-    #        message = sellcoins_settings.message + "\n\n" + f"<a href='lightning://{encoded_lnurl}'><img src='http://{settings.host}:{settings.port}/api/v1/qrcode/{encoded_lnurl}'></a>"
+    #        message = (
+    #            sellcoins_settings.message + "\n\n"
+    #            + f"<a href='lightning://{encoded_lnurl}'>"
+    #            + f"<img src='http://{settings.host}:{settings.port}"
+    #            + f"/api/v1/qrcode/{encoded_lnurl}'></a>"
+    #        )
     #        await send_notification(
     #            nostr_identifiers = [order.email_to] if product.email else None,
     #            email_addresses = [order.nostr_key] if product.nostr else None,
@@ -56,4 +63,3 @@ async def on_invoice_paid(payment: Payment) -> None:
     #        )
     #    except Exception as e:
     #        assert f"Error sending email: {e}"
-
