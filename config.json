@@ -1,11 +1,11 @@
 {
   "id": "sellcoins",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "name": "SellCoins",
   "repo": "https://github.com/lnbits/sellcoins",
   "short_description": "Sell coins for fiat",
   "tile": "/sellcoins/static/image/sellcoins.png",
-  "min_lnbits_version": "1.7.0",
+  "min_lnbits_version": "1.7.0-rc1",
   "contributors": [
     {
       "name": "Ben Arc",

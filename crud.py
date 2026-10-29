@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from lnbits.db import Database
 from lnbits.helpers import urlsafe_short_hash
@@ -50,7 +50,7 @@ async def update_order(data: Order) -> Order:
     return Order(**data.model_dump())
 
 
-async def get_orders(settings_id: str) -> List[Order]:
+async def get_orders(settings_id: str) -> list[Order]:
     return await db.fetchall(
         "SELECT * FROM sellcoins.orders WHERE settings_id = :settings_id",
         {"settings_id": settings_id},
@@ -75,7 +75,7 @@ async def get_product(product_id: Optional[str]) -> Optional[Product]:
     )
 
 
-async def get_products(settings_id: Optional[str]) -> List[Product]:
+async def get_products(settings_id: Optional[str]) -> list[Product]:
     return await db.fetchall(
         "SELECT * FROM sellcoins.products WHERE settings_id = :settings_id",
         {"settings_id": settings_id},
