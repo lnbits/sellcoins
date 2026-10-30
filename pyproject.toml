@@ -1,26 +1,30 @@
-[tool.poetry]
+[project]
 name = "sellcoins"
-version = "0.0.0"
+version = "0.1.0"
 description = "Eightball is a simple API that allows you to create a random number generator."
-authors = ["benarc", "dni <dni@lnbits.com>"]
+authors = [{ name = "benarc" }, { name = "dni", email = "dni@lnbits.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = ["lnbits>=1.7.0rc1", "mypy==1.17.1"]
+
+[dependency-groups]
+dev = [
+    "black>=24.3.0,<25.0.0",
+    "pytest-asyncio>=0.21.0,<0.22.0",
+    "pytest>=7.3.2,<8.0.0",
+    "mypy==1.17.1",
+    "pre-commit>=3.2.2,<4.0.0",
+    "ruff>=0.3.2,<0.4.0",
+    "pytest-md>=0.2.0,<0.3.0",
+]
+
+[tool.poetry]
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.10 | ^3.9"
-lnbits = {version = "*", allow-prereleases = true}
-mypy = "^1.13.0"
+python = ">=3.10,<3.13"
 
-[tool.poetry.group.dev.dependencies]
-black = "^24.3.0"
-pytest-asyncio = "^0.21.0"
-pytest = "^7.3.2"
-mypy = "^1.5.1"
-pre-commit = "^3.2.2"
-ruff = "^0.3.2"
-pytest-md = "^0.2.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+build-constraint-dependencies = ["scikit-build-core<0.10"]
 
 [tool.mypy]
 [[tool.mypy.overrides]]

@@ -10,9 +10,7 @@ from .views import sellcoins_generic_router
 from .views_api import sellcoins_api_router
 from .views_lnurl import sellcoins_lnurl_router
 
-logger.debug(
-    "Sellcoins running and ready to sell coins!"
-)
+logger.debug("Sellcoins running and ready to sell coins!")
 
 
 sellcoins_ext: APIRouter = APIRouter(prefix="/sellcoins", tags=["SellCoins"])

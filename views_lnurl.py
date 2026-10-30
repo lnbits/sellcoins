@@ -5,13 +5,14 @@ import shortuuid
 from fastapi import APIRouter, Request
 from lnbits.core.services import pay_invoice
 from lnbits.core.services.websockets import websocket_updater
+from lnbits.settings import settings as lnbits_settings
+from lnbits.utils.exchange_rates import get_fiat_rate_and_price_satoshis
+from loguru import logger
 
 from .crud import get_order, get_product, get_settings, update_order
-from .models import Order
-from lnbits.utils.exchange_rates import get_fiat_rate_and_price_satoshis
 from .helpers import get_pr
-from loguru import logger
-from lnbits.settings import settings as lnbits_settings
+from .models import Order
+
 sellcoins_lnurl_router = APIRouter()
 
 
@@ -35,6 +36,15 @@ async def api_lnurl_withdraw(
     sellcoins_settings = await get_settings(product.settings_id)
     if not sellcoins_settings:
         return {"status": "ERROR", "reason": "No settings found"}
+    if (
+        product.amount is None
+        or sellcoins_settings.haircut is None
+        or not sellcoins_settings.denomination
+    ):
+        return {
+            "status": "ERROR",
+            "reason": "Product or payment settings are incomplete",
+        }
     k1 = shortuuid.uuid(name=order_id)
     if sellcoins_settings.auto_convert:
         exchange_rate, _ = await get_fiat_rate_and_price_satoshis(
@@ -51,7 +61,7 @@ async def api_lnurl_withdraw(
         else:
             sats_amount = product.amount * 100
     order.sats_amount = sats_amount
-    await update_order(Order(**order.dict()))
+    await update_order(Order(**order.model_dump()))
     return {
         "tag": "withdrawRequest",
         "callback": str(
@@ -98,18 +108,20 @@ async def api_lnurl_withdraw_cb(
             "reason": "No sellcoins found, could not find settings",
         }
 
+    if order.sats_amount is None or not sellcoins_settings.send_wallet_id:
+        return {
+            "status": "ERROR",
+            "reason": "Product or payment settings are incomplete",
+        }
+
     # Check the k1
     k1_check = shortuuid.uuid(name=order_id)
     if k1_check != k1:
         return {"status": "ERROR", "reason": "Wrong k1 check provided"}
 
-    # Check the order status
-    if order.status == "claimed":
-        return {"status": "ERROR", "reason": "Order already claimed"}
-
     # Set as claimed and try to pay IMPORTANT as this stops race conditions
     order.status = "claimed"
-    await update_order(Order(**order.dict()))
+    await update_order(Order(**order.model_dump()))
     try:
         await pay_invoice(
             wallet_id=sellcoins_settings.send_wallet_id,
@@ -117,24 +129,25 @@ async def api_lnurl_withdraw_cb(
             max_sat=order.sats_amount * 1000,
             extra={"tag": f"SellCoins - {order_id}"},
         )
-        await websocket_updater(order_id, order.id)
+        await websocket_updater(order_id, order.id or "")
     except Exception as e:
         # If payment fails, revert the order status
         order.status = "paid"
-        await update_order(Order(**order.dict()))
+        await update_order(Order(**order.model_dump()))
         return {"status": "ERROR", "reason": f"Error paying invoice: {e}"}
 
     # Tribute to the developers.
     # Removing this will break the license for this extension.
-    # But more importantly it would just be mean, 
+    # But more importantly it would just be mean,
     # these small tributes help keep developement going.
     if sellcoins_settings.live_mode:
         try:
-            tribute = order.sats_amount * 0.5 // 100  # 0.5% tribute
+            tribute = int(order.sats_amount * 0.5 // 100)  # 0.5% tribute
             await pay_tribute(tribute, sellcoins_settings.send_wallet_id)
         except Exception as e:
             logger.warning(f"Error paying tribute: {e}")
     return {"status": "OK"}
+
 
 async def pay_tribute(tribute: int, wallet_id: str) -> None:
     try:

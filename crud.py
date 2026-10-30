@@ -1,5 +1,5 @@
-from typing import List, Optional, Union
-from datetime import datetime
+from typing import Optional
+
 from lnbits.db import Database
 from lnbits.helpers import urlsafe_short_hash
 
@@ -12,10 +12,10 @@ db = Database("ext_sellcoins")
 
 async def create_settings(data: Settings) -> Settings:
     await db.insert("sellcoins.settings", data)
-    return Settings(**data.dict())
+    return Settings(**data.model_dump())
 
 
-async def get_settings(user_id: str) -> Optional[Settings]:
+async def get_settings(user_id: Optional[str]) -> Optional[Settings]:
     return await db.fetchone(
         "SELECT * FROM sellcoins.settings WHERE id = :id",
         {"id": user_id},
@@ -25,7 +25,7 @@ async def get_settings(user_id: str) -> Optional[Settings]:
 
 async def update_settings(data: Settings) -> Settings:
     await db.update("sellcoins.settings", data)
-    return Settings(**data.dict())
+    return Settings(**data.model_dump())
 
 
 # Order
@@ -34,7 +34,7 @@ async def update_settings(data: Settings) -> Settings:
 async def create_order(data: Order) -> Order:
     data.id = urlsafe_short_hash()
     await db.insert("sellcoins.orders", data)
-    return Order(**data.dict())
+    return Order(**data.model_dump())
 
 
 async def get_order(checking_id: str) -> Optional[Order]:
@@ -44,12 +44,13 @@ async def get_order(checking_id: str) -> Optional[Order]:
         Order,
     )
 
+
 async def update_order(data: Order) -> Order:
     await db.update("sellcoins.orders", data)
-    return Order(**data.dict())
+    return Order(**data.model_dump())
 
 
-async def get_orders(settings_id: str) -> Optional[Order]:
+async def get_orders(settings_id: str) -> list[Order]:
     return await db.fetchall(
         "SELECT * FROM sellcoins.orders WHERE settings_id = :settings_id",
         {"settings_id": settings_id},
@@ -63,10 +64,10 @@ async def get_orders(settings_id: str) -> Optional[Order]:
 async def create_product(data: Product) -> Product:
     data.id = urlsafe_short_hash()
     await db.insert("sellcoins.products", data)
-    return Product(**data.dict())
+    return Product(**data.model_dump())
 
 
-async def get_product(product_id: str) -> Optional[Product]:
+async def get_product(product_id: Optional[str]) -> Optional[Product]:
     return await db.fetchone(
         "SELECT * FROM sellcoins.products WHERE id = :id",
         {"id": product_id},
@@ -74,7 +75,7 @@ async def get_product(product_id: str) -> Optional[Product]:
     )
 
 
-async def get_products(settings_id: str) -> List[Product]:
+async def get_products(settings_id: Optional[str]) -> list[Product]:
     return await db.fetchall(
         "SELECT * FROM sellcoins.products WHERE settings_id = :settings_id",
         {"settings_id": settings_id},

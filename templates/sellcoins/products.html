@@ -11,32 +11,50 @@
 </div>
 <div class="row q-col-gutter-md justify-center">
   <div class="q-gutter-md row wrap justify-start q-mt-lg">
-
-    <q-card v-for="product in products" :key="product.id" class="q-ma-sm" style="width: 200px">
+    <q-card
+      v-for="product in products"
+      :key="product.id"
+      class="q-ma-sm"
+      style="width: 200px"
+    >
       <q-card-section>
-        <div class="text-h4"><span v-text="denomination + ' ' + product.amount"></span></div>
-        <div v-if="auto_convert"><span
-            v-text="'( roughly ' + convert_amount(product.amount) + ' ' + receive_denomination + ' )'"></span></div>
-        <div v-else class="text-h6"><span
-            v-text="'( roughly ' + product.price + ' ' + receive_denomination + ' )'"></span></div>
+        <div class="text-h4">
+          <span v-text="denomination + ' ' + product.amount"></span>
+        </div>
+        <div v-if="auto_convert">
+          <span
+            v-text="'( roughly ' + convert_amount(product.amount) + ' ' + receive_denomination + ' )'"
+          ></span>
+        </div>
+        <div v-else class="text-h6">
+          <span
+            v-text="'( roughly ' + product.price + ' ' + receive_denomination + ' )'"
+          ></span>
+        </div>
         <div class="text-h6 q-pt-lg"><span v-text="product.title"></span></div>
-        <div class="text-subtitle2 text-grey-7"><span v-text="product.description"></span></div>
+        <div class="text-subtitle2 text-grey-7">
+          <span v-text="product.description"></span>
+        </div>
       </q-card-section>
       <q-card-section>
-        <q-btn color="primary" size="md" class="full-width" icon="shopping_cart" label="Buy"
-          @click="createOrder(product.id)"></q-btn>
+        <q-btn
+          color="primary"
+          size="md"
+          class="full-width"
+          icon="shopping_cart"
+          label="Buy"
+          @click="createOrder(product.id)"
+        ></q-btn>
       </q-card-section>
     </q-card>
-
   </div>
 </div>
 
-{% endblock %}
-{% block styles %}
+{% endblock %} {% block styles %}
 <style>
   .q-page {
     background-repeat: repeat-x;
-    background-image: url('{{ header_image }}') !important;
+    background-image: url("{{ header_image }}") !important;
     background-size: auto 180px;
   }
 
@@ -45,53 +63,57 @@
     display: none;
   }
 </style>
-{% endblock %}
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
   window.app = Vue.createApp({
-    el: '#vue',
+    el: "#vue",
     mixins: [windowMixin],
     data: function () {
       return {
-        title: '{{ title }}',
-        exchange_rate: '{{ exchange_rate }}',
-        auto_convert: '{{ auto_convert }}',
-        haircut: '{{ haircut }}',
-        description: '{{ description }}',
-        products: '{{ products }}'.length > 0 ? JSON.parse('{{ products | tojson }}') : [],
-        denomination: '{{ denomination }}',
-        receive_denomination: '{{LNBITS_DENOMINATION}}',
-        header_image: '{{ header_image }}'
-      }
+        title: "{{ title }}",
+        exchange_rate: "{{ exchange_rate }}",
+        auto_convert: "{{ auto_convert }}",
+        haircut: "{{ haircut }}",
+        description: "{{ description }}",
+        products:
+          "{{ products }}".length > 0
+            ? JSON.parse("{{ products | tojson }}")
+            : [],
+        denomination: "{{ denomination }}",
+        receive_denomination: "{{LNBITS_DENOMINATION}}",
+        header_image: "{{ header_image }}",
+      };
     },
     methods: {
       async createOrder(productId) {
         try {
           const response = await LNbits.api.request(
-            'GET',
-            '/sellcoins/api/v1/order/' + productId
-          )
-          window.location.href = `/sellcoins/order/${response.data.order_id}`
+            "GET",
+            "/sellcoins/api/v1/order/" + productId,
+          );
+          window.location.href = `/sellcoins/order/${response.data.order_id}`;
         } catch (err) {
-          console.log(err)
+          console.log(err);
           this.$q.notify({
-            type: 'warning',
-            message: 'Failed to create order'
+            type: "warning",
+            message: "Failed to create order",
           });
         }
       },
       convert_amount(amount) {
-        if (this.receive_denomination === 'sats') {
-          return parseInt((this.exchange_rate * amount - (this.exchange_rate * amount / 100 * parseInt(this.haircut))))
-      }
-      else {
-          return parseFloat((1 * amount)).toFixed(2)
+        if (this.receive_denomination === "sats") {
+          return parseInt(
+            this.exchange_rate * amount -
+              ((this.exchange_rate * amount) / 100) * parseInt(this.haircut),
+          );
+        } else {
+          return parseFloat(1 * amount).toFixed(2);
         }
-      }
+      },
     },
     created: async function () {
-      console.log(this.products)
-    }
-  })
+      console.log(this.products);
+    },
+  });
 </script>
 {% endblock %}

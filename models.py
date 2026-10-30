@@ -1,6 +1,8 @@
-from typing import Optional
-from pydantic import BaseModel
 from datetime import datetime, timezone
+from typing import Optional
+
+from pydantic import BaseModel
+
 
 class Settings(BaseModel):
     id: Optional[str] = ""
@@ -10,21 +12,23 @@ class Settings(BaseModel):
     title: Optional[str] = ""
     description: Optional[str] = ""
     header_image: Optional[str] = ""
-    haircut: Optional[int] = ""
-    auto_convert: Optional[bool]
-    email: Optional[bool]
-    nostr: Optional[bool]
-    launch_page: Optional[bool]
-    live_mode: Optional[bool]
+    haircut: Optional[int] = None
+    auto_convert: Optional[bool] = None
+    email: Optional[bool] = None
+    nostr: Optional[bool] = None
+    launch_page: Optional[bool] = None
+    live_mode: Optional[bool] = None
     message: Optional[str] = ""
+
 
 class Product(BaseModel):
     id: Optional[str] = ""
     settings_id: Optional[str] = ""
     title: Optional[str] = ""
     description: Optional[str] = ""
-    amount: Optional[int]
-    price: Optional[int]
+    amount: Optional[int] = None
+    price: Optional[int] = None
+
 
 class Order(BaseModel):
     id: Optional[str] = ""
@@ -37,6 +41,7 @@ class Order(BaseModel):
     payment_hash: Optional[str] = ""
     sats_amount: Optional[int] = 0
     created_at: datetime = datetime.now(timezone.utc)
+
 
 class CreateOrder(BaseModel):
     payment_request: str
