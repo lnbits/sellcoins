@@ -20,6 +20,7 @@ sellcoins_lnurl_router = APIRouter()
     "/api/v1/lnurl/{order_id}",
     status_code=HTTPStatus.OK,
     name="sellcoins.api_lnurl_withdraw",
+    openapi_extra={"x-lnbits-local-lnurl": True},
 )
 async def api_lnurl_withdraw(
     request: Request,
@@ -78,6 +79,7 @@ async def api_lnurl_withdraw(
     "/api/v1/lnurl/callback/{order_id}",
     status_code=HTTPStatus.OK,
     name="sellcoins.api_lnurl_callback",
+    openapi_extra={"x-lnbits-local-lnurl": True},
 )
 async def api_lnurl_withdraw_cb(
     order_id: str,

@@ -75,10 +75,7 @@
         auto_convert: "{{ auto_convert }}",
         haircut: "{{ haircut }}",
         description: "{{ description }}",
-        products:
-          "{{ products }}".length > 0
-            ? JSON.parse("{{ products | tojson }}")
-            : [],
+        products: {{ products | tojson }},
         denomination: "{{ denomination }}",
         receive_denomination: "{{LNBITS_DENOMINATION}}",
         header_image: "{{ header_image }}",
