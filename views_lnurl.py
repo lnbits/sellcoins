@@ -94,8 +94,8 @@ async def api_lnurl_withdraw_cb(
         return {"status": "ERROR", "reason": "No sellcoins found"}
 
     # Check the order status
-    if order.status == "claimed":
-        return {"status": "ERROR", "reason": "Order already claimed"}
+    if order.status != "paid":
+        return {"status": "ERROR", "reason": "Order claimed or not paid for"}
 
     product = await get_product(order.product_id)
     if not product:
@@ -110,7 +110,11 @@ async def api_lnurl_withdraw_cb(
             "reason": "No sellcoins found, could not find settings",
         }
 
-    if order.sats_amount is None or not sellcoins_settings.send_wallet_id:
+    if (
+        order.sats_amount is None
+        or order.sats_amount <= 0
+        or not sellcoins_settings.send_wallet_id
+    ):
         return {
             "status": "ERROR",
             "reason": "Product or payment settings are incomplete",
@@ -128,7 +132,7 @@ async def api_lnurl_withdraw_cb(
         await pay_invoice(
             wallet_id=sellcoins_settings.send_wallet_id,
             payment_request=pr,
-            max_sat=order.sats_amount * 1000,
+            max_sat=order.sats_amount,
             extra={"tag": f"SellCoins - {order_id}"},
         )
         await websocket_updater(order_id, order.id or "")

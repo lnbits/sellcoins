@@ -20,7 +20,11 @@ async def wait_for_paid_invoices():
 
 
 async def on_invoice_paid(payment: Payment) -> None:
-    if payment.extra.get("tag") != "SellCoins":
+    if (
+        payment.extra.get("tag") != "SellCoins"
+        or not payment.success
+        or not payment.is_in
+    ):
         return
     logger.debug(payment)
 
@@ -29,10 +33,15 @@ async def on_invoice_paid(payment: Payment) -> None:
     assert order_id, "order_id not set in invoice"
     order = await get_order(order_id)
     assert order, "Order ID not set in invoice"
+    # Order creation stores the checking ID, including for fiat payments.
+    if payment.checking_id != order.payment_hash:
+        return
     product = await get_product(order.product_id)
     assert product, "Product not found"
     sellcoins_settings = await get_settings(product.settings_id)
     assert sellcoins_settings, "Settings not found"
+    if payment.wallet_id != sellcoins_settings.receive_wallet_id:
+        return
     if order.status == "claimed" or order.status == "paid":
         await websocket_updater(order_id, "claimed")
         logger.warning(f"Order {order.id} already claimed, skipping")
