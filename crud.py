@@ -1,3 +1,4 @@
+from secrets import token_hex
 from typing import Optional
 
 from lnbits.db import Database
@@ -48,6 +49,40 @@ async def get_order(checking_id: str) -> Optional[Order]:
 async def update_order(data: Order) -> Order:
     await db.update("sellcoins.orders", data)
     return Order(**data.model_dump())
+
+
+async def prepare_order_withdrawal(order_id: str, sats_amount: int) -> Optional[Order]:
+    await db.execute(
+        """
+        UPDATE sellcoins.orders SET sats_amount = :sats_amount, k1 = :k1
+        WHERE id = :id AND status = 'paid' AND k1 IS NULL
+        """,
+        {"id": order_id, "sats_amount": sats_amount, "k1": token_hex(32)},
+    )
+    return await get_order(order_id)
+
+
+async def claim_order(order_id: str, k1: str, sats_amount: int) -> bool:
+    result = await db.execute(
+        """
+        UPDATE sellcoins.orders SET status = 'claimed'
+        WHERE id = :id AND status = 'paid' AND k1 = :k1
+          AND sats_amount = :sats_amount
+        """,
+        {"id": order_id, "k1": k1, "sats_amount": sats_amount},
+    )
+    return result.rowcount == 1
+
+
+async def set_order_status(order_id: str, status: str, expected_status: str) -> bool:
+    result = await db.execute(
+        """
+        UPDATE sellcoins.orders SET status = :status
+        WHERE id = :id AND status = :expected_status
+        """,
+        {"id": order_id, "status": status, "expected_status": expected_status},
+    )
+    return result.rowcount == 1
 
 
 async def get_orders(settings_id: str) -> list[Order]:

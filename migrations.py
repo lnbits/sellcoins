@@ -71,3 +71,7 @@ async def m005_add_settings_testing_mode(db):
 
 async def m006_add_order_sats_amount(db):
     await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN sats_amount INTEGER")
+
+
+async def m007_add_order_k1(db):
+    await db.execute("ALTER TABLE sellcoins.orders ADD COLUMN k1 TEXT")
