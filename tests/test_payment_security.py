@@ -22,6 +22,7 @@ def order_payment(monkeypatch):
         settings_id="seller-id",
         status="unpaid",
         payment_hash="invoice-checking-id",
+        k1="11" * 32,
     )
     product = Product(id=order.product_id, settings_id=order.settings_id, amount=100000)
     settings = Settings(
@@ -40,18 +41,29 @@ def order_payment(monkeypatch):
         status=PaymentState.SUCCESS,
         extra={"tag": "SellCoins", "order_id": order.id},
     )
-    update_order = AsyncMock()
+
+    async def transition(order_id, status, expected_status):
+        if order.status != expected_status:
+            return False
+        order.status = status
+        return True
+
+    async def claim(order_id, k1, sats_amount):
+        return await transition(order_id, "claimed", "paid")
+
+    set_order_status = AsyncMock(side_effect=transition)
+    monkeypatch.setattr(tasks, "set_order_status", set_order_status)
+    monkeypatch.setattr(views_lnurl, "claim_order", AsyncMock(side_effect=claim))
     websocket_updater = AsyncMock()
     for module in (tasks, views_lnurl):
         monkeypatch.setattr(module, "get_order", AsyncMock(return_value=order))
         monkeypatch.setattr(module, "get_product", AsyncMock(return_value=product))
         monkeypatch.setattr(module, "get_settings", AsyncMock(return_value=settings))
-        monkeypatch.setattr(module, "update_order", update_order)
         monkeypatch.setattr(module, "websocket_updater", websocket_updater)
     return SimpleNamespace(
         order=order,
         payment=payment,
-        update_order=update_order,
+        set_order_status=set_order_status,
         websocket_updater=websocket_updater,
     )
 
@@ -88,7 +100,7 @@ async def test_unrelated_or_unsettled_payment_does_not_pay_order(
     await tasks.on_invoice_paid(payment)
 
     assert order_payment.order.status == "unpaid"
-    order_payment.update_order.assert_not_awaited()
+    order_payment.set_order_status.assert_not_awaited()
     order_payment.websocket_updater.assert_not_awaited()
 
 
@@ -103,7 +115,7 @@ async def test_original_payment_marks_order_paid(order_payment, checking_id):
     await tasks.on_invoice_paid(order_payment.payment)
 
     assert order_payment.order.status == "paid"
-    order_payment.update_order.assert_awaited_once()
+    order_payment.set_order_status.assert_awaited_once()
     order_payment.websocket_updater.assert_awaited_once_with("order-id", "paid")
 
 
@@ -115,7 +127,7 @@ async def test_settled_order_is_not_updated_again(order_payment, status):
     await tasks.on_invoice_paid(order_payment.payment)
 
     assert order_payment.order.status == status
-    order_payment.update_order.assert_not_awaited()
+    order_payment.set_order_status.assert_not_awaited()
 
 
 @pytest.mark.anyio
@@ -132,7 +144,7 @@ async def test_withdraw_requires_paid_order(order_payment, monkeypatch, status):
 
     assert result["status"] == "ERROR"
     assert order_payment.order.status == status
-    order_payment.update_order.assert_not_awaited()
+    order_payment.set_order_status.assert_not_awaited()
     pay_invoice.assert_not_awaited()
 
 
@@ -152,7 +164,7 @@ async def test_withdraw_requires_positive_amount(
 
     assert result["status"] == "ERROR"
     assert order_payment.order.status == "paid"
-    order_payment.update_order.assert_not_awaited()
+    order_payment.set_order_status.assert_not_awaited()
     pay_invoice.assert_not_awaited()
 
 
@@ -163,8 +175,13 @@ async def test_paid_order_withdrawal_uses_satoshi_limit(order_payment, monkeypat
     pay_invoice = AsyncMock()
     monkeypatch.setattr(views_lnurl, "pay_invoice", pay_invoice)
 
+    monkeypatch.setattr(
+        views_lnurl,
+        "bolt11_decode",
+        lambda _: SimpleNamespace(amount_msat=100000000),
+    )
     result = await views_lnurl.api_lnurl_withdraw_cb(
-        "order-id", pr="invoice", k1=shortuuid.uuid(name="order-id")
+        "order-id", pr="invoice", k1=order_payment.order.k1
     )
 
     assert result == {"status": "OK"}

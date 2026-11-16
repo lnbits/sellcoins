@@ -7,8 +7,7 @@ from lnbits.core.services import websocket_updater
 from lnbits.tasks import register_invoice_listener
 from loguru import logger
 
-from .crud import get_order, get_product, get_settings, update_order
-from .models import Order
+from .crud import get_order, get_product, get_settings, set_order_status
 
 
 async def wait_for_paid_invoices():
@@ -47,8 +46,8 @@ async def on_invoice_paid(payment: Payment) -> None:
         logger.warning(f"Order {order.id} already claimed, skipping")
         return
     # Mark the order as paid so we can still settle with the user if needed.
-    order.status = "paid"
-    await update_order(Order(**order.model_dump()))
+    if not await set_order_status(order_id, "paid", "unpaid"):
+        return
 
     # Use WS to update the frontend
     await websocket_updater(order_id, "paid")
