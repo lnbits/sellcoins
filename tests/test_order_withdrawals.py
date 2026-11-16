@@ -64,11 +64,13 @@ async def test_existing_order_migration(monkeypatch, tmp_path):
         for name, migration in vars(migrations).items():
             if name.startswith("m00") and not name.startswith("m007"):
                 await migration(db)
-        await db.execute("""
+        await db.execute(
+            """
             INSERT INTO sellcoins.orders
                 (id, product_id, settings_id, status, sats_amount)
             VALUES ('existing', 'product', 'seller', 'paid', 1000)
-            """)
+            """
+        )
         await migrations.m007_add_order_k1(db)
         order = await crud.get_order("existing")
         assert order and order.status == "paid" and order.k1 is None
